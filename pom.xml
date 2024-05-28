@@ -13,6 +13,7 @@
         <mockito.version>5.3.1</mockito.version>
         <assertj.version>3.24.2</assertj.version>
         <postgresql.version>42.6.0</postgresql.version>
+        <liquibase.version>4.24.0</liquibase.version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
@@ -43,6 +44,11 @@
         <artifactId>postgresql</artifactId>
         <version>${postgresql.version}</version>
     </dependency>
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+            <version>${liquibase.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct</artifactId>
