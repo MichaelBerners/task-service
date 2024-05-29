@@ -8,13 +8,13 @@ import java.util.List;
 
 public class TaskHistoryResponse {
 
-    private List<Task> tasks;
+    private String task;
     private String taskStatus;
     private LocalDate date;
     private LocalTime time;
 
-    public List<Task> getTasks() {
-        return tasks;
+    public String  getTask() {
+        return task;
     }
 
     public String getTaskStatus() {
@@ -29,8 +29,8 @@ public class TaskHistoryResponse {
         return time;
     }
 
-    public void setTasks(List<Task> tasks) {
-        this.tasks = tasks;
+    public void setTask(String task) {
+        this.task = task;
     }
 
     public void setTaskStatus(String taskStatus) {

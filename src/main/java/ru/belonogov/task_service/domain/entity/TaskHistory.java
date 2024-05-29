@@ -7,7 +7,7 @@ import java.util.List;
 public class TaskHistory {
 
     private Long id;
-    private List<Task> tasks;
+    private Task task;
     private TaskStatus taskStatus;
     private LocalDate date;
     private LocalTime time;
@@ -16,8 +16,8 @@ public class TaskHistory {
         return id;
     }
 
-    public List<Task> getTasks() {
-        return tasks;
+    public Task getTask() {
+        return task;
     }
 
     public TaskStatus getTaskStatus() {
@@ -36,8 +36,8 @@ public class TaskHistory {
         this.id = id;
     }
 
-    public void setTasks(List<Task> tasks) {
-        this.tasks = tasks;
+    public void setTask(Task task) {
+        this.task = task;
     }
 
     public void setTaskStatus(TaskStatus taskStatus) {
