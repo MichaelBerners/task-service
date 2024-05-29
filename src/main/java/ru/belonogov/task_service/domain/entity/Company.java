@@ -6,7 +6,7 @@ public class Company {
 
     private Long id;
     private String name;
-    private List<Employee> employees;
+    //private List<Employee> employees;
 
     public Long getId() {
         return id;
@@ -16,9 +16,9 @@ public class Company {
         return name;
     }
 
-    public List<Employee> getEmployees() {
+    /*public List<Employee> getEmployees() {
         return employees;
-    }
+    }*/
 
     public void setId(Long id) {
         this.id = id;
@@ -28,7 +28,7 @@ public class Company {
         this.name = name;
     }
 
-    public void setEmployees(List<Employee> employees) {
+    /*public void setEmployees(List<Employee> employees) {
         this.employees = employees;
-    }
+    }*/
 }

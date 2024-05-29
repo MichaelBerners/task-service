@@ -9,6 +9,8 @@ public interface CompanyService {
 
     CompanyResponse read(Long id);
 
+    CompanyResponse read(String name);
+
     CompanyResponse update(Long id, CompanyRequest companyRequest);
 
     void delete(Long id);

@@ -11,6 +11,8 @@ public interface CompanyDao {
 
     Optional<Company> findById(Long id);
 
+    Optional<Company> findByName(CompanyRequest companyRequest);
+
     Company save(Long id, CompanyRequest companyRequest);
 
     void delete (Long id);
