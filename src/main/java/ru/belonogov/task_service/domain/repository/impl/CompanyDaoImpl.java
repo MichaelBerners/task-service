@@ -117,7 +117,7 @@ public class CompanyDaoImpl implements CompanyDao {
                 preparedStatement.setLong(2, id);
                 int i = preparedStatement.executeUpdate();
                 if (i == 0) {
-                    throw new RuntimeException("пользователь не найден");
+                    throw new RuntimeException("компания не найдена");
                 }
                 result = new Company();
                 result.setId(id);
