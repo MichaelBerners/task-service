@@ -7,7 +7,7 @@ import java.util.Optional;
 
 public interface EmployeeDao {
 
-    Employee save(EmployeeRequest employeeRequest);
+    Employee save(String firstName, String lastName, int rating, Long companyId);
 
     Optional<Employee> findById(Long id);
 

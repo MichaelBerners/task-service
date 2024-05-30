@@ -32,8 +32,8 @@ public class CompanyServiceImpl implements CompanyService {
     }
 
     @Override
-    public CompanyResponse read(String name) {
-        Company company = companyDao.findByName(name).orElseThrow(() -> new CompanyNotFoundException());
+    public CompanyResponse read(CompanyRequest companyRequest) {
+        Company company = companyDao.findByName(companyRequest).orElseThrow(() -> new CompanyNotFoundException());
 
         return companyMapper.companyToCompanyResponse(company);
     }
