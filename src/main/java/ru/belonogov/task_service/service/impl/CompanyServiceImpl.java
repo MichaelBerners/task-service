@@ -18,8 +18,8 @@ public class CompanyServiceImpl implements CompanyService {
     }
 
     @Override
-    public CompanyResponse create(CompanyRequest companyRequest) {
-        Company save = companyDao.save(companyRequest);
+    public CompanyResponse create(String companyName) {
+        Company save = companyDao.save(companyName);
 
         return companyMapper.companyToCompanyResponse(save);
     }
@@ -32,15 +32,15 @@ public class CompanyServiceImpl implements CompanyService {
     }
 
     @Override
-    public CompanyResponse read(CompanyRequest companyRequest) {
-        Company company = companyDao.findByName(companyRequest).orElseThrow(() -> new CompanyNotFoundException());
+    public Company read(String companyName) {
+        Company company = companyDao.findByName(companyName).orElseThrow(() -> new CompanyNotFoundException());
 
-        return companyMapper.companyToCompanyResponse(company);
+        return company;
     }
 
     @Override
-    public CompanyResponse update(Long id, CompanyRequest companyRequest) {
-        Company save = companyDao.save(id, companyRequest);
+    public CompanyResponse update(CompanyRequest companyRequest) {
+        Company save = companyDao.update(companyRequest);
 
         return companyMapper.companyToCompanyResponse(save);
     }
@@ -48,6 +48,5 @@ public class CompanyServiceImpl implements CompanyService {
     @Override
     public void delete(Long id) {
         companyDao.delete(id);
-
     }
 }

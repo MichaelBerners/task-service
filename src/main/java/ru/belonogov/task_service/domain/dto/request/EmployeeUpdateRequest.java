@@ -1,16 +1,15 @@
 package ru.belonogov.task_service.domain.dto.request;
 
-public class CompanyRequest {
+public class EmployeeUpdateRequest {
 
     private Long id;
-
-    private String name;
+    private int rating;
 
     public Long getId() {
         return id;
     }
 
-    public String getName() {
-        return name;
+    public int getRating() {
+        return rating;
     }
 }

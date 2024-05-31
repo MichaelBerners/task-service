@@ -4,24 +4,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.belonogov.task_service.domain.dto.mapper.EmployeeMapper;
 import ru.belonogov.task_service.domain.dto.request.EmployeeRequest;
+import ru.belonogov.task_service.domain.dto.request.EmployeeUpdateRequest;
 import ru.belonogov.task_service.domain.entity.Company;
 import ru.belonogov.task_service.domain.entity.Employee;
 import ru.belonogov.task_service.domain.repository.EmployeeDao;
 import ru.belonogov.task_service.util.MyConnectionPool;
 
 import java.sql.*;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 public class EmployeeDaoImpl implements EmployeeDao {
 
-    private final Company company;
-    private final EmployeeMapper employeeMapper = EmployeeMapper.INSTANCE;
     private final MyConnectionPool myConnectionPool = new MyConnectionPool();
     private final Logger logger = LoggerFactory.getLogger(EmployeeDaoImpl.class);
-
-    public EmployeeDaoImpl(Company company) {
-        this.company = company;
-    }
 
     @Override
     public Employee save(String firstName, String lastName, int rating, Company company) {
@@ -48,6 +45,7 @@ public class EmployeeDaoImpl implements EmployeeDao {
                 result.setLastName(lastName);
                 result.setRating(rating);
                 result.setCompany(company);
+                result.setTasks(Collections.emptyList());
             }
         }
         catch (SQLException e) {
@@ -90,7 +88,43 @@ public class EmployeeDaoImpl implements EmployeeDao {
     }
 
     @Override
-    public Employee update(Long id, int rating) {
+    public List<Employee> findAllByTask(String taskName) {
+        String sqlFindAllByTask = """
+                select employee.*, name from employee e 
+                join tasks_employee te on te.employee_id = e.id
+                join task t on t.id = te.task_id where name = ?
+                """;
+        Connection connection = null;
+        List<Employee> employees = Collections.emptyList();
+        try {
+            connection = myConnectionPool.getConnection();
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sqlFindAllByTask)){
+                preparedStatement.setString(1, taskName);
+                ResultSet resultSet = preparedStatement.executeQuery();
+                while (resultSet.next()) {
+                    Employee employee = new Employee();
+                    employee.setId(resultSet.getLong("id"));
+                    employee.setFirstName(resultSet.getString("first_name"));
+                    employee.setLastName(resultSet.getString("last_name"));
+                    employee.setRating(resultSet.getInt("rating"));
+                    employees.add(employee);
+                }
+            }
+        }
+        catch (SQLException e) {
+            logger.error("Задачи не найдены");
+        }
+        finally {
+            if(connection != null) {
+                myConnectionPool.release(connection);
+            }
+        }
+
+        return employees;
+    }
+
+    @Override
+    public Employee update(EmployeeUpdateRequest employeeUpdateRequest) {
         String sqlUpdateRatingById = "update employees set rating = ? where id = ?";
         String sqlFindById = "select * from employees as e join company as c on e.company_id = c.id where id = ?";
         Connection connection = null;
@@ -101,13 +135,13 @@ public class EmployeeDaoImpl implements EmployeeDao {
             try (PreparedStatement updateRating = connection.prepareStatement(sqlUpdateRatingById);
                  PreparedStatement findById = connection.prepareStatement(sqlFindById)
             ){
-                updateRating.setInt(1, rating);
-                updateRating.setLong(2, id);
+                updateRating.setInt(1,employeeUpdateRequest.getRating());
+                updateRating.setLong(2, employeeUpdateRequest.getId());
                 int quantity = updateRating.executeUpdate();
                 if (quantity == 0) {
                     throw new RuntimeException("Работник не найден");
                 }
-                findById.setLong(1, id);
+                findById.setLong(1, employeeUpdateRequest.getId());
                 result = getResult(findById);
             }
         }

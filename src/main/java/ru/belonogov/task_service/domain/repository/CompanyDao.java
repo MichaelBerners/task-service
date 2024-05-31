@@ -7,15 +7,15 @@ import java.util.Optional;
 
 public interface CompanyDao {
 
-    Company save(CompanyRequest companyRequest);
+    Company save(String companyName);
 
     Optional<Company> findById(Long id);
 
-    Optional<Company> findByName(CompanyRequest companyRequest);
+    Optional<Company> findByName(String companyName);
 
-    Company save(Long id, CompanyRequest companyRequest);
+    Company update(CompanyRequest companyRequest);
 
-    void delete (Long id);
+    void delete(Long id);
 
 
 }
