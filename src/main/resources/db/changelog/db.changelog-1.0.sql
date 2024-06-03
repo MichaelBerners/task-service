@@ -44,11 +44,12 @@ create table tasks
 
 create table tasks_employee
 (
-    id bigserial,
     task_id bigint not null,
-    constraint tasks_fk foreign key (task_id) references tasks (id),
     employee_id bigint not null,
+    constraint tasks_employee_pk primary key (task_id, employee_id),
+    constraint tasks_fk foreign key (task_id) references tasks (id),
     constraint employee_fk foreign key (employee_id) references employees (id)
+
 );
 
 --rollback drop table tasks_employee

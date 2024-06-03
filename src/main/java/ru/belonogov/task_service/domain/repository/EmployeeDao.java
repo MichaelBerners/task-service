@@ -18,5 +18,7 @@ public interface EmployeeDao {
 
     Employee update(EmployeeUpdateRequest employeeUpdateRequest);
 
+    boolean addNewTask(Long employeeId, Long taskId);
+
     void delete (Long id);
 }

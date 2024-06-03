@@ -17,5 +17,7 @@ public interface TaskDao {
 
     Task update(TaskUpdateRequest taskUpdateRequest);
 
+    boolean addNewEmployeeToTask(Long taskId, Long employeeId);
+
     void delete (Long id);
 }

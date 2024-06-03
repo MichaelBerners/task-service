@@ -11,6 +11,7 @@ import ru.belonogov.task_service.domain.repository.EmployeeDao;
 import ru.belonogov.task_service.util.MyConnectionPool;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -90,12 +91,13 @@ public class EmployeeDaoImpl implements EmployeeDao {
     @Override
     public List<Employee> findAllByTask(String taskName) {
         String sqlFindAllByTask = """
-                select employee.*, name from employee e 
+                select employee.*, c.*, t.name from employee e
+                join company c on c.id = e.company_id
                 join tasks_employee te on te.employee_id = e.id
                 join task t on t.id = te.task_id where name = ?
                 """;
         Connection connection = null;
-        List<Employee> employees = Collections.emptyList();
+        List<Employee> employees = new ArrayList<>();
         try {
             connection = myConnectionPool.getConnection();
             try (PreparedStatement preparedStatement = connection.prepareStatement(sqlFindAllByTask)){
@@ -103,16 +105,23 @@ public class EmployeeDaoImpl implements EmployeeDao {
                 ResultSet resultSet = preparedStatement.executeQuery();
                 while (resultSet.next()) {
                     Employee employee = new Employee();
-                    employee.setId(resultSet.getLong("id"));
-                    employee.setFirstName(resultSet.getString("first_name"));
-                    employee.setLastName(resultSet.getString("last_name"));
-                    employee.setRating(resultSet.getInt("rating"));
+                    Company company = new Company();
+                    company.setId(resultSet.getLong("c.id"));
+                    company.setName(resultSet.getString("c.name"));
+                    company.setEmployees(Collections.emptyList());
+                    employee.setId(resultSet.getLong("e.id"));
+                    employee.setFirstName(resultSet.getString("e.first_name"));
+                    employee.setLastName(resultSet.getString("e.last_name"));
+                    employee.setRating(resultSet.getInt("e.rating"));
+                    employee.setCompany(company);
+                    employee.setTasks(Collections.emptyList());
                     employees.add(employee);
                 }
             }
         }
         catch (SQLException e) {
             logger.error("Задачи не найдены");
+            return Collections.emptyList();
         }
         finally {
             if(connection != null) {
@@ -155,6 +164,29 @@ public class EmployeeDaoImpl implements EmployeeDao {
         }
 
         return result;
+    }
+
+    @Override
+    public boolean addNewTask(Long taskId, Long employeeId) {
+        String sqlAddNewTask = "insert into tasks_employee (tasks_id, employee_id) values (?, ?)";
+        Connection connection = null;
+        try {
+            connection = myConnectionPool.getConnection();
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sqlAddNewTask)){
+                preparedStatement.setLong(1, taskId);
+                preparedStatement.setLong(2, employeeId);
+                int i = preparedStatement.executeUpdate();
+                if (i > 0) {
+                    return true;
+                }
+
+                return false;
+            }
+        }
+        catch (SQLException e) {
+            logger.error(e.getMessage());
+            return false;
+        }
     }
 
     private static Employee getResult(PreparedStatement preparedStatement) throws SQLException {
