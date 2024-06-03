@@ -1,6 +1,7 @@
 package ru.belonogov.task_service.domain.entity;
 
 import java.util.List;
+import java.util.Set;
 
 public class Task {
 
@@ -9,7 +10,7 @@ public class Task {
     private String description;
     private int rating;
     private TaskStatus taskStatus;
-    private List<Employee> employees;
+    private Set<Employee> employees;
 
     public Long getId() {
         return id;
@@ -31,7 +32,7 @@ public class Task {
         return taskStatus;
     }
 
-    public List<Employee> getEmployees() {
+    public Set<Employee> getEmployees() {
         return employees;
     }
 
@@ -55,7 +56,7 @@ public class Task {
         this.taskStatus = taskStatus;
     }
 
-    public void setEmployees(List<Employee> employees) {
+    public void setEmployees(Set<Employee> employees) {
         this.employees = employees;
     }
 }

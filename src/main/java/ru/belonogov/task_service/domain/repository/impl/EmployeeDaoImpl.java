@@ -2,8 +2,6 @@ package ru.belonogov.task_service.domain.repository.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.belonogov.task_service.domain.dto.mapper.EmployeeMapper;
-import ru.belonogov.task_service.domain.dto.request.EmployeeRequest;
 import ru.belonogov.task_service.domain.dto.request.EmployeeUpdateRequest;
 import ru.belonogov.task_service.domain.entity.Company;
 import ru.belonogov.task_service.domain.entity.Employee;
@@ -46,7 +44,7 @@ public class EmployeeDaoImpl implements EmployeeDao {
                 result.setLastName(lastName);
                 result.setRating(rating);
                 result.setCompany(company);
-                result.setTasks(Collections.emptyList());
+                result.setTasks(Collections.emptySet());
             }
         }
         catch (SQLException e) {
@@ -91,10 +89,10 @@ public class EmployeeDaoImpl implements EmployeeDao {
     @Override
     public List<Employee> findAllByTask(String taskName) {
         String sqlFindAllByTask = """
-                select employee.*, c.*, t.name from employee e
+                select e.*, c.*, t.name from employees e
                 join company c on c.id = e.company_id
                 join tasks_employee te on te.employee_id = e.id
-                join task t on t.id = te.task_id where name = ?
+                join tasks t on t.id = te.task_id where name = ?
                 """;
         Connection connection = null;
         List<Employee> employees = new ArrayList<>();
@@ -108,13 +106,12 @@ public class EmployeeDaoImpl implements EmployeeDao {
                     Company company = new Company();
                     company.setId(resultSet.getLong("c.id"));
                     company.setName(resultSet.getString("c.name"));
-                    company.setEmployees(Collections.emptyList());
                     employee.setId(resultSet.getLong("e.id"));
                     employee.setFirstName(resultSet.getString("e.first_name"));
                     employee.setLastName(resultSet.getString("e.last_name"));
                     employee.setRating(resultSet.getInt("e.rating"));
                     employee.setCompany(company);
-                    employee.setTasks(Collections.emptyList());
+                    employee.setTasks(Collections.emptySet());
                     employees.add(employee);
                 }
             }
@@ -168,7 +165,7 @@ public class EmployeeDaoImpl implements EmployeeDao {
 
     @Override
     public boolean addNewTask(Long taskId, Long employeeId) {
-        String sqlAddNewTask = "insert into tasks_employee (tasks_id, employee_id) values (?, ?)";
+        String sqlAddNewTask = "insert into tasks_employee (task_id, employee_id) values (?, ?)";
         Connection connection = null;
         try {
             connection = myConnectionPool.getConnection();

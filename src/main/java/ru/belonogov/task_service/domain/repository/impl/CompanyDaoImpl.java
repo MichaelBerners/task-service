@@ -10,7 +10,6 @@ import ru.belonogov.task_service.util.MyConnectionPool;
 
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -74,10 +73,8 @@ public class CompanyDaoImpl implements CompanyDao {
                     employee.setLastName(resultSet.getString("e.last_name"));
                     employee.setRating(resultSet.getInt("e.rating"));
                     employee.setCompany(result);
-                    employee.setTasks(Collections.emptyList());
                     employees.add(employee);
                 }
-                result.setEmployees(employees);
 
                 return Optional.ofNullable(result);
             }
@@ -106,7 +103,6 @@ public class CompanyDaoImpl implements CompanyDao {
                 Company result = new Company();
                 result.setId(resultSet.getLong("id"));
                 result.setName(resultSet.getString("name"));
-                result.setEmployees(Collections.emptyList());
 
                 return Optional.ofNullable(result);
             }
