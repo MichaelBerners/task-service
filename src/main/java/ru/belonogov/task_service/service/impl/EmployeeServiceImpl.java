@@ -11,7 +11,6 @@ import ru.belonogov.task_service.domain.repository.EmployeeDao;
 import ru.belonogov.task_service.service.CompanyService;
 import ru.belonogov.task_service.service.EmployeeService;
 
-import java.util.Optional;
 
 public class EmployeeServiceImpl implements EmployeeService {
     private final EmployeeDao employeeDao;
@@ -34,7 +33,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public EmployeeResponse findById(Long id) {
-        Employee result = employeeDao.findById(id).orElseThrow(() -> new EmployeeNotFoundException());
+        Employee result = employeeDao.findById(id).orElseThrow(() -> new EmployeeNotFoundException("Работник не найден"));
 
         return employeeMapper.employeeToEmployeeResponse(result);
     }

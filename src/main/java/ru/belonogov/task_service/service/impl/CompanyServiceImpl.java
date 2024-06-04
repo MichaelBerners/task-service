@@ -26,14 +26,14 @@ public class CompanyServiceImpl implements CompanyService {
 
     @Override
     public CompanyResponse read(Long id) {
-        Company company = companyDao.findById(id).orElseThrow(() -> new CompanyNotFoundException());
+        Company company = companyDao.findById(id).orElseThrow(() -> new CompanyNotFoundException("Компания не найдена"));
 
         return companyMapper.companyToCompanyResponse(company);
     }
 
     @Override
     public Company read(String companyName) {
-        Company company = companyDao.findByName(companyName).orElseThrow(() -> new CompanyNotFoundException());
+        Company company = companyDao.findByName(companyName).orElseThrow(() -> new CompanyNotFoundException("Компания не найдена"));
 
         return company;
     }

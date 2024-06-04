@@ -10,11 +10,15 @@
 
     <properties>
         <junit.version>5.10.1</junit.version>
-        <mockito.version>5.3.1</mockito.version>
+        <mockito.version>5.11.0</mockito.version>
         <assertj.version>3.24.2</assertj.version>
         <postgresql.version>42.6.0</postgresql.version>
         <liquibase.version>4.24.0</liquibase.version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
+        <log4j.version>2.20.0</log4j.version>
+        <jakarta.servlet.version>6.0.0</jakarta.servlet.version>
+        <jackson.version>2.17.0</jackson.version>
+        <hikariCp.version>5.0.1</hikariCp.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -55,10 +59,27 @@
             <version>${mapstruct.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.guicedee.services</groupId>
-            <artifactId>sl4j</artifactId>
-            <version>1.0.13.5</version>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+            <version>${log4j.version}</version>
         </dependency>
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <version>${jakarta.servlet.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>${hikariCp.version}</version>
+        </dependency>
+
     </dependencies>
 
 
