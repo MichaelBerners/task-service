@@ -52,7 +52,7 @@ public class EmployeeDaoImpl implements EmployeeDao {
     public Optional<Employee> findById(Long id) {
         String sqlFindById = """
                 select * from tasks_employee te
-                join employee e on e.id = te.employee_id
+                join employees e on e.id = te.employee_id
                 join tasks t on t.id = te.task_id                
                 join company c on e.company_id = c.id 
                 where id = ?""";
@@ -97,8 +97,8 @@ public class EmployeeDaoImpl implements EmployeeDao {
     @Override
     public List<Employee> findAllByTask(String taskName) {
         String sqlFindAllByTask = """
-                select e.*, c.*, from tasks_employee te                
-                join employee e on te.employee_id = e.id
+                select e.*, c.* from tasks_employee te                
+                join employees e on te.employee_id = e.id
                 join tasks t on t.id = te.task_id
                 join company c on c.id = e.company_id
                 where t.name = ?

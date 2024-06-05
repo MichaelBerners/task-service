@@ -1,0 +1,8 @@
+db.driver-class-name: org.postgresql.Driver
+db.url: jdbc:postgresql://localhost:5432/task
+db.userName: admin
+db.password: 111
+
+liquibase.enabled: true
+liquibase.change-log: db/changelog/changelog-master.yml
+liquibase.liquibase-schema: migration

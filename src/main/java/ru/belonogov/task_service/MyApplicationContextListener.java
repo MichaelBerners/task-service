@@ -84,7 +84,7 @@ public class MyApplicationContextListener implements ServletContextListener {
         TaskDao taskDao = new TaskDaoImpl();
 
         CompanyService companyService = new CompanyServiceImpl(companyDao);
-        EmployeeService employeeService = new EmployeeServiceImpl(employeeDao, companyService);
+        EmployeeService employeeService = new EmployeeServiceImpl(employeeDao, companyDao);
         TaskService taskService = new TaskServiceImpl(taskDao);
         servletContext.setAttribute("companyService", companyService);
         servletContext.setAttribute("employeeService", employeeService);

@@ -40,7 +40,7 @@ public class CompanyDaoImpl implements CompanyDao {
 
     @Override
     public Optional<Company> findById(Long id) {
-        String sqlFindById = "select * from employee e join company c on c.company_id = e.id where c.id = ?";
+        String sqlFindById = "select * from employees e join company c on e.company_id = c.id where c.id = ?";
         Company company = null;
         try (Connection connection = DataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(sqlFindById)) {
@@ -74,7 +74,7 @@ public class CompanyDaoImpl implements CompanyDao {
 
     @Override
     public Optional<Company> findByName(String companyName) {
-        String sqlFindByName = "select * from employee e join company c on c.company_id = e.id where name = ?";
+        String sqlFindByName = "select * from employees e join company c on e.company_id = c.id where name = ?";
         Company company = null;
         try (Connection connection = DataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(sqlFindByName)) {
@@ -111,7 +111,7 @@ public class CompanyDaoImpl implements CompanyDao {
     @Override
     public Company update(CompanyUpdateRequest companyUpdateRequest) {
         String sqlUpdate = "update company set name = ? where id = ?";
-        String sqlFindById = "select * from employee e join company c on c.company_id = e.id where c.id = ?";
+        String sqlFindById = "select * from employees e join company c on e.company_id = c.id where c.id = ?";
         String companyName = companyUpdateRequest.getName();
         Long id = companyUpdateRequest.getId();
         Company company = null;

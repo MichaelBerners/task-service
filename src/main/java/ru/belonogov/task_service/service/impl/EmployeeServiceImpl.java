@@ -8,7 +8,9 @@ import ru.belonogov.task_service.domain.dto.response.EmployeeResponse;
 import ru.belonogov.task_service.domain.entity.Company;
 import ru.belonogov.task_service.domain.entity.Employee;
 import ru.belonogov.task_service.domain.exception.AddNewTaskException;
+import ru.belonogov.task_service.domain.exception.CompanyNotFoundException;
 import ru.belonogov.task_service.domain.exception.EmployeeNotFoundException;
+import ru.belonogov.task_service.domain.repository.CompanyDao;
 import ru.belonogov.task_service.domain.repository.EmployeeDao;
 import ru.belonogov.task_service.service.CompanyService;
 import ru.belonogov.task_service.service.EmployeeService;
@@ -20,17 +22,17 @@ import java.util.stream.Collectors;
 
 public class EmployeeServiceImpl implements EmployeeService {
     private final EmployeeDao employeeDao;
-    private final CompanyService companyService;
+    private final CompanyDao companyDao;
     private final EmployeeMapper employeeMapper = EmployeeMapper.INSTANCE;
 
-    public EmployeeServiceImpl(EmployeeDao employeeDao, CompanyService companyService) {
+    public EmployeeServiceImpl(EmployeeDao employeeDao, CompanyDao companyDao) {
         this.employeeDao = employeeDao;
-        this.companyService = companyService;
+        this.companyDao = companyDao;
     }
 
     @Override
     public EmployeeResponse save(EmployeeRequest employeeRequest) {
-        Company company = companyService.read(employeeRequest.getCompanyName());
+        Company company = companyDao.findByName(employeeRequest.getCompanyName()).orElseThrow(() -> new CompanyNotFoundException("Компания не найдена"));
         int defaultRating = 5;
         Employee employee = new Employee();
         employee.setFirstName(employeeRequest.getFirstName());
