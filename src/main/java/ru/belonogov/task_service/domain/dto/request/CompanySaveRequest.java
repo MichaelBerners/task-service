@@ -1,16 +1,14 @@
 package ru.belonogov.task_service.domain.dto.request;
 
-public class CompanyRequest {
-
-    private Long id;
+public class CompanySaveRequest {
 
     private String name;
 
-    public Long getId() {
-        return id;
-    }
-
     public String getName() {
         return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

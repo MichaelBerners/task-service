@@ -2,7 +2,11 @@ package ru.belonogov.task_service.service;
 
 import ru.belonogov.task_service.domain.dto.request.TaskRequest;
 import ru.belonogov.task_service.domain.dto.request.TaskUpdateRequest;
+import ru.belonogov.task_service.domain.dto.request.TaskEmployeeRequest;
 import ru.belonogov.task_service.domain.dto.response.TaskResponse;
+import ru.belonogov.task_service.domain.entity.Task;
+
+import java.util.List;
 
 public interface TaskService {
 
@@ -10,9 +14,11 @@ public interface TaskService {
 
     TaskResponse findById(Long id);
 
+    List<TaskResponse> findAllByEmployee(Long id);
+
     TaskResponse update(TaskUpdateRequest taskUpdateRequest);
 
-    void addNewEmployeeToTask(Long taskId, Long employeeId);
+    void addNewEmployeeToTask(TaskEmployeeRequest taskEmployeeRequest);
 
     void delete (Long id);
 }

@@ -1,19 +1,19 @@
 package ru.belonogov.task_service.domain.repository;
 
-import ru.belonogov.task_service.domain.dto.request.CompanyRequest;
+import ru.belonogov.task_service.domain.dto.request.CompanyUpdateRequest;
 import ru.belonogov.task_service.domain.entity.Company;
 
 import java.util.Optional;
 
 public interface CompanyDao {
 
-    Company save(String companyName);
+    Company save(Company company);
 
     Optional<Company> findById(Long id);
 
     Optional<Company> findByName(String companyName);
 
-    Company update(CompanyRequest companyRequest);
+    Company update(CompanyUpdateRequest companyUpdateRequest);
 
     void delete(Long id);
 

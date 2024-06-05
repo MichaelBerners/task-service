@@ -10,7 +10,7 @@ import java.util.Optional;
 
 public interface TaskDao {
 
-    Task save(TaskRequest taskRequest, TaskStatus taskStatus);
+    Task save(Task task);
 
     Optional<Task> findById(Long id);
 

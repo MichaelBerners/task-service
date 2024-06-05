@@ -1,7 +1,8 @@
 package ru.belonogov.task_service.service.impl;
 
 import ru.belonogov.task_service.domain.dto.mapper.CompanyMapper;
-import ru.belonogov.task_service.domain.dto.request.CompanyRequest;
+import ru.belonogov.task_service.domain.dto.request.CompanySaveRequest;
+import ru.belonogov.task_service.domain.dto.request.CompanyUpdateRequest;
 import ru.belonogov.task_service.domain.dto.response.CompanyResponse;
 import ru.belonogov.task_service.domain.entity.Company;
 import ru.belonogov.task_service.domain.exception.CompanyNotFoundException;
@@ -18,28 +19,30 @@ public class CompanyServiceImpl implements CompanyService {
     }
 
     @Override
-    public CompanyResponse create(String companyName) {
-        Company save = companyDao.save(companyName);
+    public CompanyResponse create(CompanySaveRequest companySaveRequest) {
+        Company company = new Company();
+        company.setName(companySaveRequest.getName());
+        Company save = companyDao.save(company);
 
         return companyMapper.companyToCompanyResponse(save);
     }
 
     @Override
-    public CompanyResponse read(Long id) {
+    public CompanyResponse findById(Long id) {
         Company company = companyDao.findById(id).orElseThrow(() -> new CompanyNotFoundException("Компания не найдена"));
 
         return companyMapper.companyToCompanyResponse(company);
     }
 
     @Override
-    public Company read(String companyName) {
+    public CompanyResponse findByName(String companyName) {
         Company company = companyDao.findByName(companyName).orElseThrow(() -> new CompanyNotFoundException("Компания не найдена"));
 
-        return company;
+        return companyMapper.companyToCompanyResponse(company);
     }
 
     @Override
-    public CompanyResponse update(CompanyRequest companyRequest) {
+    public CompanyResponse update(CompanyUpdateRequest companyRequest) {
         Company save = companyDao.update(companyRequest);
 
         return companyMapper.companyToCompanyResponse(save);

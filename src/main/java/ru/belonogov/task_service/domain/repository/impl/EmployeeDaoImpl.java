@@ -5,23 +5,27 @@ import org.slf4j.LoggerFactory;
 import ru.belonogov.task_service.domain.dto.request.EmployeeUpdateRequest;
 import ru.belonogov.task_service.domain.entity.Company;
 import ru.belonogov.task_service.domain.entity.Employee;
+import ru.belonogov.task_service.domain.entity.Task;
+import ru.belonogov.task_service.domain.entity.TaskStatus;
+import ru.belonogov.task_service.domain.exception.SaveException;
+import ru.belonogov.task_service.domain.exception.UpdateException;
 import ru.belonogov.task_service.domain.repository.EmployeeDao;
 import ru.belonogov.task_service.util.DataSource;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class EmployeeDaoImpl implements EmployeeDao {
 
     private final Logger logger = LoggerFactory.getLogger(EmployeeDaoImpl.class);
+    private final Set emptySet = Collections.emptySet();
 
     @Override
-    public Employee save(String firstName, String lastName, int rating, Company company) {
-        Employee result = null;
-        //String sqlFindCompanyByName = "select id from company where name = ?";
+    public Employee save(Employee employee) {
+        String firstName = employee.getFirstName();
+        String lastName = employee.getLastName();
+        int rating = employee.getRating();
+        Company company = employee.getCompany();
         String sqlSaveEmployee = "insert into employees (first_name, last_name, rating, company_id) values (?, ?, ?, ?)";
         try (Connection connection = DataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(sqlSaveEmployee, Statement.RETURN_GENERATED_KEYS);) {
@@ -31,49 +35,73 @@ public class EmployeeDaoImpl implements EmployeeDao {
             preparedStatement.setLong(4, company.getId());
             int i = preparedStatement.executeUpdate();
             if (i == 0) {
-                throw new RuntimeException("Ошибка создания работника");
+                throw new SaveException("Ошибка создания работника");
             }
             ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
             generatedKeys.next();
-            result = new Employee();
-            result.setId(generatedKeys.getLong("id"));
-            result.setFirstName(firstName);
-            result.setLastName(lastName);
-            result.setRating(rating);
-            result.setCompany(company);
-            result.setTasks(Collections.emptySet());
+            employee.setId(generatedKeys.getLong("id"));
         } catch (SQLException e) {
             logger.error(e.getMessage());
-            throw new RuntimeException("Ошибка создания работника");
+            throw new SaveException("Ошибка создания работника");
         }
 
-        return result;
+        return employee;
     }
 
     @Override
     public Optional<Employee> findById(Long id) {
-        String sqlFindById = "select * from employees as e join company as c on e.company_id = c.id where id = ?";
-        Employee result = null;
+        String sqlFindById = """
+                select * from tasks_employee te
+                join employee e on e.id = te.employee_id
+                join tasks t on t.id = te.task_id                
+                join company c on e.company_id = c.id 
+                where id = ?""";
+        Employee employee = null;
         try (Connection connection = DataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(sqlFindById)) {
             preparedStatement.setLong(1, id);
-            result = getResult(preparedStatement);
-
-            return Optional.ofNullable(result);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            Set<Task> taskHashSet = new HashSet<>();
+            while (resultSet.next()) {
+                if(employee == null) {
+                    Company company = new Company();
+                    company.setId(resultSet.getLong("c.id"));
+                    company.setName(resultSet.getString("c.name"));
+                    company.setEmployees(emptySet);
+                    employee = new Employee();
+                    employee.setId(resultSet.getLong("e.id"));
+                    employee.setFirstName(resultSet.getString("first_name"));
+                    employee.setLastName(resultSet.getString("lastName"));
+                    employee.setRating(resultSet.getInt("e.rating"));
+                    employee.setCompany(company);
+                    employee.setTasks(taskHashSet);
+                }
+                Task task = new Task();
+                task.setId(resultSet.getLong("t.id"));
+                task.setName(resultSet.getString("t.name"));
+                task.setDescription(resultSet.getString("description"));
+                task.setRating(resultSet.getInt("t.rating"));
+                task.setTaskStatus(TaskStatus.valueOf(resultSet.getString("task_status")));
+                task.setEmployees(emptySet);
+                taskHashSet.add(task);
+            }
         } catch (SQLException e) {
             logger.error(e.getMessage());
 
             return Optional.empty();
         }
+
+        return Optional.ofNullable(employee);
     }
 
     @Override
     public List<Employee> findAllByTask(String taskName) {
         String sqlFindAllByTask = """
-                select e.*, c.*, t.name from employees e
+                select e.*, c.*, from tasks_employee te                
+                join employee e on te.employee_id = e.id
+                join tasks t on t.id = te.task_id
                 join company c on c.id = e.company_id
-                join tasks_employee te on te.employee_id = e.id
-                join tasks t on t.id = te.task_id where name = ?
+                where t.name = ?
                 """;
         List<Employee> employees = new ArrayList<>();
         try (Connection connection = DataSource.getConnection();
@@ -90,7 +118,7 @@ public class EmployeeDaoImpl implements EmployeeDao {
                 employee.setLastName(resultSet.getString("e.last_name"));
                 employee.setRating(resultSet.getInt("e.rating"));
                 employee.setCompany(company);
-                employee.setTasks(Collections.emptySet());
+                employee.setTasks(emptySet);
                 employees.add(employee);
             }
 
@@ -106,24 +134,36 @@ public class EmployeeDaoImpl implements EmployeeDao {
     public Employee update(EmployeeUpdateRequest employeeUpdateRequest) {
         String sqlUpdateRatingById = "update employees set rating = ? where id = ?";
         String sqlFindById = "select * from employees as e join company as c on e.company_id = c.id where id = ?";
-        Employee result = null;
+        Employee employee = new Employee();
 
         try (Connection connection = DataSource.getConnection();
              PreparedStatement updateRating = connection.prepareStatement(sqlUpdateRatingById);
              PreparedStatement findById = connection.prepareStatement(sqlFindById)) {
             updateRating.setInt(1, employeeUpdateRequest.getRating());
             updateRating.setLong(2, employeeUpdateRequest.getId());
-            int quantity = updateRating.executeUpdate();
-            if (quantity == 0) {
-                throw new RuntimeException("Работник не найден");
+            int update = updateRating.executeUpdate();
+            if (update == 0) {
+                throw new UpdateException("Данные работника не обновлены");
             }
             findById.setLong(1, employeeUpdateRequest.getId());
-            result = getResult(findById);
+            ResultSet resultSet = findById.executeQuery();
+            resultSet.next();
+            Company company = new Company();
+            company.setId(resultSet.getLong("c.id"));
+            company.setName(resultSet.getString("name"));
+            employee.setId(resultSet.getLong("e.id"));
+            employee.setFirstName(resultSet.getString("first_name"));
+            employee.setLastName(resultSet.getString("lastName"));
+            employee.setRating(resultSet.getInt("rating"));
+            employee.setCompany(company);
+            employee.setTasks(Collections.emptySet());
         } catch (SQLException e) {
             logger.error(e.getMessage());
+            throw new UpdateException("Данные работника не обновлены");
         }
 
-        return result;
+        return employee;
+
     }
 
     @Override
@@ -133,32 +173,17 @@ public class EmployeeDaoImpl implements EmployeeDao {
              PreparedStatement preparedStatement = connection.prepareStatement(sqlAddNewTask)) {
             preparedStatement.setLong(1, taskId);
             preparedStatement.setLong(2, employeeId);
-            int i = preparedStatement.executeUpdate();
-            if (i > 0) {
-                return true;
+            int update = preparedStatement.executeUpdate();
+            if (update == 0) {
+                return false;
             }
 
-            return false;
+            return true;
         } catch (SQLException e) {
             logger.error(e.getMessage());
 
             return false;
         }
-    }
-
-    private static Employee getResult(PreparedStatement preparedStatement) throws SQLException {
-        ResultSet resultSet = preparedStatement.executeQuery();
-        resultSet.next();
-        Company company = new Company();
-        company.setId(resultSet.getLong("c.id"));
-        company.setName(resultSet.getString("name"));
-        Employee result = new Employee();
-        result.setId(resultSet.getLong("e.id"));
-        result.setFirstName(resultSet.getString("first_name"));
-        result.setLastName(resultSet.getString("lastName"));
-        result.setRating(resultSet.getInt("rating"));
-        result.setCompany(company);
-        return result;
     }
 
     @Override

@@ -7,7 +7,8 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import ru.belonogov.task_service.domain.dto.request.CompanyRequest;
+import ru.belonogov.task_service.domain.dto.request.CompanySaveRequest;
+import ru.belonogov.task_service.domain.dto.request.CompanyUpdateRequest;
 import ru.belonogov.task_service.domain.dto.response.CompanyResponse;
 import ru.belonogov.task_service.service.CompanyService;
 
@@ -36,8 +37,8 @@ public class CreateCompanyServlet extends HttpServlet {
         try (BufferedReader reader = req.getReader();
              PrintWriter writer = resp.getWriter()){
 
-            CompanyRequest companyRequest = objectMapper.readValue(reader, CompanyRequest.class);
-            CompanyResponse companyResponse = companyService.create(companyRequest.getName());
+            CompanySaveRequest companySaveRequest = objectMapper.readValue(reader, CompanySaveRequest.class);
+            CompanyResponse companyResponse = companyService.create(companySaveRequest);
             resp.setStatus(HttpServletResponse.SC_OK);
             objectMapper.writeValue(writer, companyResponse);
         }
