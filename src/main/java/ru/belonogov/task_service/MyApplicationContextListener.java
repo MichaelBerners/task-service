@@ -3,6 +3,7 @@ package ru.belonogov.task_service;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
+import jakarta.servlet.annotation.WebListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.belonogov.task_service.domain.repository.CompanyDao;
@@ -24,7 +25,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
-
+@WebListener
 public class MyApplicationContextListener implements ServletContextListener {
     private Properties properties;
     private final Logger logger = LoggerFactory.getLogger(MyApplicationContextListener.class);
