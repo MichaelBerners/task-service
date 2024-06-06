@@ -1,11 +1,15 @@
 package ru.belonogov.task_service.domain.dto.response;
 
+import java.util.Set;
+
 public class TaskResponse {
 
     private String name;
     private String description;
     private int rating;
     private String taskStatus;
+
+    private Set<String> employees;
 
     public String getName() {
         return name;
@@ -37,5 +41,13 @@ public class TaskResponse {
 
     public void setTaskStatus(String taskStatus) {
         this.taskStatus = taskStatus;
+    }
+
+    public Set<String> getEmployees() {
+        return employees;
+    }
+
+    public void setEmployees(Set<String> employees) {
+        this.employees = employees;
     }
 }

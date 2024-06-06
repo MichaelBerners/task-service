@@ -11,7 +11,7 @@ import ru.belonogov.task_service.util.Converter;
 
 import java.io.IOException;
 
-@WebServlet("tasks/delete")
+@WebServlet("/tasks/delete")
 public class DeleteTaskServlet extends HttpServlet {
 
     private TaskService taskService;

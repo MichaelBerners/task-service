@@ -4,5 +4,5 @@ db.userName: admin
 db.password: 111
 
 liquibase.enabled: true
-liquibase.change-log: db/changelog/changelog-master.yml
+liquibase.change-log: db/changelog/db.changelog-master.yaml
 liquibase.liquibase-schema: migration

@@ -1,5 +1,6 @@
 package ru.belonogov.task_service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
@@ -18,6 +19,7 @@ import ru.belonogov.task_service.service.TaskService;
 import ru.belonogov.task_service.service.impl.CompanyServiceImpl;
 import ru.belonogov.task_service.service.impl.EmployeeServiceImpl;
 import ru.belonogov.task_service.service.impl.TaskServiceImpl;
+import ru.belonogov.task_service.util.Converter;
 import ru.belonogov.task_service.util.DataSource;
 import ru.belonogov.task_service.util.LiquibaseDemo;
 
@@ -51,7 +53,7 @@ public class MyApplicationContextListener implements ServletContextListener {
             properties = new Properties();
         }
         try {
-            properties.load(servletContext.getResourceAsStream("application.yml"));
+            properties.load(servletContext.getResourceAsStream("/WEB-INF/classes/application.yml"));
             servletContext.setAttribute("servletProperty", properties);
         }
         catch (IOException e) {
@@ -60,11 +62,11 @@ public class MyApplicationContextListener implements ServletContextListener {
     }
 
     private void dataBaseConfiguration(ServletContext servletContext){
-        String driverClassName = properties.getProperty("org.postgresql.Driver");
+        String driverClassName = properties.getProperty("db.driver-class-name");
         String url = properties.getProperty("db.url");
         String userName = properties.getProperty("db.userName");
         String password = properties.getProperty("db.password");
-        DataSource.init(url, userName, password);
+        DataSource.init(url, userName, password, driverClassName);
         String changeLogFile = properties.getProperty("liquibase.change-log");
         if (Boolean.parseBoolean(properties.getProperty("liquibase.enabled"))) {
             try (Connection connection = DataSource.getConnection()){
@@ -83,6 +85,8 @@ public class MyApplicationContextListener implements ServletContextListener {
         CompanyDao companyDao = new CompanyDaoImpl();
         EmployeeDao employeeDao = new EmployeeDaoImpl();
         TaskDao taskDao = new TaskDaoImpl();
+        ObjectMapper objectMapper = new ObjectMapper();
+        Converter converter = new Converter(objectMapper);
 
         CompanyService companyService = new CompanyServiceImpl(companyDao);
         EmployeeService employeeService = new EmployeeServiceImpl(employeeDao, companyDao);
@@ -90,5 +94,6 @@ public class MyApplicationContextListener implements ServletContextListener {
         servletContext.setAttribute("companyService", companyService);
         servletContext.setAttribute("employeeService", employeeService);
         servletContext.setAttribute("taskService", taskService);
+        servletContext.setAttribute("converter", converter);
     }
 }

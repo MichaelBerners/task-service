@@ -54,18 +54,4 @@ create table tasks_employee
 
 --rollback drop table tasks_employee
 
---changeset belonogov:5
-
-create table tasks_history
-(
-    id bigserial,
-    constraint tasks_history_pk primary key (id),
-    task_id bigint not null,
-    constraint tasks_history_tasks_fk foreign key (task_id) references tasks (id),
-    task_status varchar(300) not null,
-    date date not null,
-    time time not null
-)
-
---rollback drop table tasks_history
 

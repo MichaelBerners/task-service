@@ -12,7 +12,7 @@ import ru.belonogov.task_service.util.Converter;
 
 import java.io.IOException;
 
-@WebServlet("/tasks/add_employee")
+@WebServlet("/tasks/add-employee")
 public class AddNewEmployeeToTaskServlet extends HttpServlet {
 
     private TaskService taskService;
