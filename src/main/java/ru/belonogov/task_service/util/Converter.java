@@ -14,9 +14,9 @@ import java.io.PrintWriter;
 
 public class Converter {
 
-    private final ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
 
-    private final Logger logger = LoggerFactory.getLogger(Converter.class);
+    private Logger logger = LoggerFactory.getLogger(Converter.class);
 
     public Converter(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
