@@ -13,9 +13,9 @@ public interface CompanyDao {
 
     Optional<Company> findByName(String companyName);
 
-    Company update(CompanyUpdateRequest companyUpdateRequest);
+    Company update(Company company);
 
-    void delete(Long id);
+    boolean delete(Long id);
 
 
 }

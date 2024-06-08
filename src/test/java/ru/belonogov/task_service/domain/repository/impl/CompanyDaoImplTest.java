@@ -6,7 +6,9 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.PostgreSQLContainer;
 import ru.belonogov.task_service.PostgresTestContainer;
+import ru.belonogov.task_service.domain.dto.request.CompanyUpdateRequest;
 import ru.belonogov.task_service.domain.entity.Company;
+import ru.belonogov.task_service.domain.exception.UpdateException;
 import ru.belonogov.task_service.domain.repository.CompanyDao;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -49,20 +51,48 @@ class CompanyDaoImplTest {
 
     @Test
     void testFindByName_shouldReturnOptionalOfCompany_whenCompanyExists() {
-        assertTrue(companyDao.findByName("Gazprom").isPresent());
+        String name = "Gazprom";
+        assertTrue(companyDao.findByName(name).isPresent());
     }
 
     @Test
     void testFindByName_shouldReturnOptional_whenCompanyIsNotExists() {
-        assertFalse(companyDao.findByName("OtherCompany").isPresent());
+        String name = "OtherCompany";
+        assertFalse(companyDao.findByName(name).isPresent());
     }
 
     @Test
-    void update() {
+    void testUpdate_shouldReturnUpdateCompany_whenCompanyExist() {
+        Company company = new Company();
+        company.setId(2L);
+        company.setName("StroyTransGaz");
+
+        Company update = companyDao.update(company);
+
+        assertThat(update)
+                .isNotNull()
+                .hasNoNullFieldsOrProperties()
+                .hasFieldOrPropertyWithValue("name", "StroyTransGaz");
     }
 
     @Test
-    void delete() {
+    void testUpdate_shouldReturnUpdateException_whenCompanyIsNotExist() {
+        Company company = new Company();
+        company.setId(100L);
+        company.setName("StroyTransGaz");
+        assertThrows(UpdateException.class, () -> companyDao.update(company));
+    }
+
+    @Test
+    void testDelete_shouldReturnTrue_whenCompanyDelete() {
+        boolean result = companyDao.delete(4L);
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    void testDelete_shouldReturnFalse_whenCompanyIsNotDelete() {
+        boolean result = companyDao.delete(1L);
+        assertThat(result).isFalse();
     }
 
     //@AfterAll

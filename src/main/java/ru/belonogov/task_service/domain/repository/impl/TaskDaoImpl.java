@@ -128,12 +128,12 @@ public class TaskDaoImpl implements TaskDao {
     }
 
     @Override
-    public Task update(TaskUpdateRequest taskUpdateRequest) {
-        Long id = taskUpdateRequest.getId();
-        String name = taskUpdateRequest.getName();
-        String description = taskUpdateRequest.getDescription();
-        TaskStatus taskStatus = taskUpdateRequest.getTaskStatus();
-        int rating = taskUpdateRequest.getRating();
+    public Task update(Task task) {
+        Long id = task.getId();
+        String name = task.getName();
+        String description = task.getDescription();
+        TaskStatus taskStatus = task.getTaskStatus();
+        int rating = task.getRating();
         String sqlUpdate = "update tasks set name = ?, description = ?, rating = ?, task_status = ? where id = ?";
         String sqlFindEmployeeByTask = """
                 select e.*, c.* from tasks_employee te
@@ -211,7 +211,7 @@ public class TaskDaoImpl implements TaskDao {
     }
 
     @Override
-    public void delete(Long id) {
+    public boolean delete(Long id) {
         String sqlDelete = "delete from tasks where id = ?";
 
         try (Connection connection = DataSource.getConnection();
@@ -220,6 +220,9 @@ public class TaskDaoImpl implements TaskDao {
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             logger.error(e.getMessage());
+            return false;
         }
+
+        return true;
     }
 }

@@ -16,9 +16,9 @@ public interface EmployeeDao {
 
     List<Employee> findAllByTask(String taskName);
 
-    Employee update(EmployeeUpdateRequest employeeUpdateRequest);
+    Employee update(Employee employee);
 
     boolean addNewTask(Long employeeId, Long taskId);
 
-    void delete (Long id);
+    boolean delete (Long id);
 }

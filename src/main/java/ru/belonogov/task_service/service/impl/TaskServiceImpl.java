@@ -58,7 +58,13 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public TaskResponse update(TaskUpdateRequest taskUpdateRequest) {
-        Task update = taskDao.update(taskUpdateRequest);
+        Task task = new Task();
+        task.setId(taskUpdateRequest.getId());
+        task.setName(taskUpdateRequest.getName());
+        task.setDescription(taskUpdateRequest.getDescription());
+        task.setRating(taskUpdateRequest.getRating());
+        task.setTaskStatus(taskUpdateRequest.getTaskStatus());
+        Task update = taskDao.update(task);
 
         return taskMapper.taskToTaskResponse(update);
     }

@@ -31,6 +31,11 @@ class CreateCompanyServletTest {
     private CreateCompanyServlet createCompanyServlet = new CreateCompanyServlet();
 
 
+    //@BeforeEach
+    void init() {
+        converter = mock(Converter.class);
+        companyService = mock(CompanyService.class);
+    }
     //@Test
     void doPostTest() throws ServletException, IOException {
         HttpServletRequest req = mock(HttpServletRequest.class);

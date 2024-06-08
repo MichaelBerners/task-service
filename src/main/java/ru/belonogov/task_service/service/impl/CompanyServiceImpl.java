@@ -43,7 +43,10 @@ public class CompanyServiceImpl implements CompanyService {
 
     @Override
     public CompanyResponse update(CompanyUpdateRequest companyRequest) {
-        Company save = companyDao.update(companyRequest);
+        Company company = new Company();
+        company.setId(companyRequest.getId());
+        company.setName(company.getName());
+        Company save = companyDao.update(company);
 
         return companyMapper.companyToCompanyResponse(save);
     }

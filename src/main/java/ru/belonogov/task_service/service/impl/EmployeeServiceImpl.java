@@ -64,7 +64,10 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public EmployeeResponse update(EmployeeUpdateRequest employeeUpdateRequest) {
-        Employee employee = employeeDao.update(employeeUpdateRequest);
+        Employee employee = new Employee();
+        employee.setId(employee.getId());
+        employee.setRating(employee.getRating());
+        Employee employeeUpdate = employeeDao.update(employee);
 
         return employeeMapper.employeeToEmployeeResponse(employee);
     }

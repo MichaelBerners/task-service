@@ -6,6 +6,7 @@ import ru.belonogov.task_service.domain.dto.request.CompanyUpdateRequest;
 import ru.belonogov.task_service.domain.entity.Company;
 import ru.belonogov.task_service.domain.entity.Employee;
 import ru.belonogov.task_service.domain.exception.SaveException;
+import ru.belonogov.task_service.domain.exception.UpdateException;
 import ru.belonogov.task_service.domain.repository.CompanyDao;
 import ru.belonogov.task_service.util.DataSource;
 
@@ -92,11 +93,12 @@ public class CompanyDaoImpl implements CompanyDao {
                     if(resultSet.getLong(1) == 0) break;
                 }
                 Employee employee = new Employee();
-                employee.setId(resultSet.getLong("1"));
+                employee.setId(resultSet.getLong(1));
                 employee.setFirstName(resultSet.getString("first_name"));
                 employee.setLastName(resultSet.getString("last_name"));
                 employee.setRating(resultSet.getInt("rating"));
                 employee.setCompany(company);
+                employee.setTasks(emptySet);
                 employeeHashSet.add(employee);
 
             }
@@ -110,12 +112,12 @@ public class CompanyDaoImpl implements CompanyDao {
     }
 
     @Override
-    public Company update(CompanyUpdateRequest companyUpdateRequest) {
+    public Company update(Company company) {
         String sqlUpdate = "update company set name = ? where id = ?";
-        String sqlFindById = "select * from employees e join company c on e.company_id = c.id where c.id = ?";
-        String companyName = companyUpdateRequest.getName();
-        Long id = companyUpdateRequest.getId();
-        Company company = null;
+        String sqlFindById = "select * from employees e right join company c on e.company_id = c.id where c.id = ?";
+        String companyName = company.getName();
+        Long id = company.getId();
+        Company companyUpdate = null;
         try (Connection connection = DataSource.getConnection();
              PreparedStatement update = connection.prepareStatement(sqlUpdate);
              PreparedStatement findById = connection.prepareStatement(sqlFindById)) {
@@ -123,32 +125,37 @@ public class CompanyDaoImpl implements CompanyDao {
             update.setLong(2, id);
             int executeUpdate = update.executeUpdate();
             if (executeUpdate == 0) {
-                throw new RuntimeException("компания не найдена");
+                throw new UpdateException("компания не была изменена");
             }
             Set<Employee> employeeHashSet = new HashSet<>();
-            company = new Company();
-            company.setId(id);
-            company.setName(companyName);
-            company.setEmployees(employeeHashSet);
+            companyUpdate = new Company();
+            companyUpdate.setId(id);
+            companyUpdate.setName(companyName);
+            companyUpdate.setEmployees(employeeHashSet);
+            findById.setLong(1, id);
             ResultSet resultSet = findById.executeQuery();
             while (resultSet.next()) {
+                if(resultSet.getLong(1) == 0) {
+                    break;
+                }
                 Employee employee = new Employee();
-                employee.setId(resultSet.getLong("e.id"));
-                employee.setFirstName(resultSet.getString("e.first_name"));
-                employee.setLastName(resultSet.getString("e.last_name"));
-                employee.setRating(resultSet.getInt("e.rating"));
-                employee.setCompany(company);
+                employee.setId(resultSet.getLong(1));
+                employee.setFirstName(resultSet.getString("first_name"));
+                employee.setLastName(resultSet.getString("last_name"));
+                employee.setRating(resultSet.getInt("rating"));
+                employee.setCompany(companyUpdate);
                 employeeHashSet.add(employee);
             }
         } catch (SQLException e) {
             logger.error(e.getMessage());
+            throw new UpdateException("компания не была изменена");
         }
 
-        return company;
+        return companyUpdate;
     }
 
     @Override
-    public void delete(Long id) {
+    public boolean delete(Long id) {
         String sqlDelete = "delete from company where id = ?";
         try (Connection connection = DataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(sqlDelete)) {
@@ -156,6 +163,9 @@ public class CompanyDaoImpl implements CompanyDao {
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             logger.error(e.getMessage());
+            return false;
         }
+
+        return true;
     }
 }

@@ -6,7 +6,8 @@ create table company
 (
     id   bigserial,
     constraint company_pk primary key (id),
-    name varchar(300) not null
+    name varchar(300) not null,
+    constraint unique_name unique (name)
 );
 
 --rollback drop table company

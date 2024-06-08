@@ -16,9 +16,9 @@ public interface TaskDao {
 
     List<Task> findAllByEmployee(Long id);
 
-    Task update(TaskUpdateRequest taskUpdateRequest);
+    Task update(Task task);
 
     boolean addNewEmployeeToTask(Long taskId, Long employeeId);
 
-    void delete (Long id);
+    boolean delete (Long id);
 }
