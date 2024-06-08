@@ -30,6 +30,7 @@ public class CompanyDaoImpl implements CompanyDao {
             ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
             generatedKeys.next();
             company.setId(generatedKeys.getLong("id"));
+            company.setEmployees(Collections.emptySet());
         } catch (SQLException e) {
             logger.error(e.getMessage());
             throw new SaveException("Ошибка сохранения нового пользователя");
@@ -40,7 +41,7 @@ public class CompanyDaoImpl implements CompanyDao {
 
     @Override
     public Optional<Company> findById(Long id) {
-        String sqlFindById = "select * from employees e join company c on e.company_id = c.id where c.id = ?";
+        String sqlFindById = "select * from employees e right join company c on e.company_id = c.id where c.id = ?";
         Company company = null;
         try (Connection connection = DataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(sqlFindById)) {
@@ -50,15 +51,16 @@ public class CompanyDaoImpl implements CompanyDao {
             while (resultSet.next()) {
                 if (company == null) {
                     company = new Company();
-                    company.setId(resultSet.getLong("c.id"));
-                    company.setName(resultSet.getString("c.name"));
+                    company.setId(resultSet.getLong(6));
+                    company.setName(resultSet.getString("name"));
                     company.setEmployees(employeeHashSet);
+                    if(resultSet.getLong(1) == 0) break;
                 }
                 Employee employee = new Employee();
-                employee.setId(resultSet.getLong("e.id"));
-                employee.setFirstName(resultSet.getString("e.first_name"));
-                employee.setLastName(resultSet.getString("e.last_name"));
-                employee.setRating(resultSet.getInt("e.rating"));
+                employee.setId(resultSet.getLong(1));
+                employee.setFirstName(resultSet.getString("first_name"));
+                employee.setLastName(resultSet.getString("last_name"));
+                employee.setRating(resultSet.getInt("rating"));
                 employee.setCompany(company);
                 employee.setTasks(emptySet);
                 employeeHashSet.add(employee);
@@ -74,7 +76,7 @@ public class CompanyDaoImpl implements CompanyDao {
 
     @Override
     public Optional<Company> findByName(String companyName) {
-        String sqlFindByName = "select * from employees e join company c on e.company_id = c.id where name = ?";
+        String sqlFindByName = "select * from employees e right join company c on e.company_id = c.id where name = ?";
         Company company = null;
         try (Connection connection = DataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(sqlFindByName)) {
@@ -84,21 +86,20 @@ public class CompanyDaoImpl implements CompanyDao {
             while (resultSet.next()) {
                 if(company == null) {
                     company = new Company();
-                    company.setId(resultSet.getLong("c.id"));
-                    company.setName(resultSet.getString("c.name"));
+                    company.setId(resultSet.getLong(6));
+                    company.setName(resultSet.getString("name"));
                     company.setEmployees(employeeHashSet);
+                    if(resultSet.getLong(1) == 0) break;
                 }
                 Employee employee = new Employee();
-                employee.setId(resultSet.getLong("e.id"));
-                employee.setFirstName(resultSet.getString("e.first_name"));
-                employee.setLastName(resultSet.getString("e.last_name"));
-                employee.setRating(resultSet.getInt("e.rating"));
+                employee.setId(resultSet.getLong("1"));
+                employee.setFirstName(resultSet.getString("first_name"));
+                employee.setLastName(resultSet.getString("last_name"));
+                employee.setRating(resultSet.getInt("rating"));
                 employee.setCompany(company);
                 employeeHashSet.add(employee);
 
             }
-            company.setId(resultSet.getLong("id"));
-            company.setName(resultSet.getString("name"));
         } catch (SQLException e) {
             logger.error(e.getMessage());
 

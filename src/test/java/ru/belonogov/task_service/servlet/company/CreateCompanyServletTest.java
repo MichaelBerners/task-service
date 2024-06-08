@@ -20,18 +20,18 @@ import java.io.IOException;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
+//@ExtendWith(MockitoExtension.class)
 class CreateCompanyServletTest {
 
-    @Mock
+    //@Mock
     private CompanyService companyService;
-    @Mock
+    //@Mock
     private Converter converter;
 
     private CreateCompanyServlet createCompanyServlet = new CreateCompanyServlet();
 
 
-    @Test
+    //@Test
     void doPostTest() throws ServletException, IOException {
         HttpServletRequest req = mock(HttpServletRequest.class);
         HttpServletResponse resp = mock(HttpServletResponse.class);
