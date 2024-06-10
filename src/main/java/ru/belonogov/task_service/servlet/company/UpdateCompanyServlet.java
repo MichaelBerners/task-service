@@ -14,16 +14,16 @@ import ru.belonogov.task_service.util.Converter;
 import java.io.IOException;
 
 @WebServlet("/company/update")
-public class UpdateCompany extends HttpServlet {
+public class UpdateCompanyServlet extends HttpServlet {
 
     private CompanyService companyService;
     private Converter converter;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
+        super.init(config);
         companyService = (CompanyService) getServletContext().getAttribute("companyService");
         converter = (Converter) getServletContext().getAttribute("converter");
-        super.init(config);
     }
 
     @Override

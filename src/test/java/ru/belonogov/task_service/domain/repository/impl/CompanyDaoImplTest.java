@@ -42,6 +42,7 @@ class CompanyDaoImplTest {
     @Test
     void testFindById_shouldReturnOptionalOfCompany_whenCompanyExists() {
         assertTrue(companyDao.findById(1L).isPresent());
+        assertThat(companyDao.findById(1L).isPresent()).isTrue();
     }
 
     @Test

@@ -20,19 +20,19 @@ public class AddNewTaskToEmployeeServlet extends HttpServlet {
 
     @Override
     public void init(ServletConfig config) throws ServletException {
+        super.init(config);
         employeeService = (EmployeeService) getServletContext().getAttribute("employeeService");
         converter = (Converter) getServletContext().getAttribute("converter");
-        super.init(config);
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("application/json");
-        req.setCharacterEncoding("UTF-8");
+        resp.setCharacterEncoding("UTF-8");
         try {
             TaskEmployeeRequest taskEmployeeRequest = converter.getRequestBody(req, TaskEmployeeRequest.class);
             employeeService.addNewTask(taskEmployeeRequest);
-            resp.setStatus(HttpServletResponse.SC_OK);
+            resp.setStatus(HttpServletResponse.SC_CREATED);
         }
         catch (Exception e) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);

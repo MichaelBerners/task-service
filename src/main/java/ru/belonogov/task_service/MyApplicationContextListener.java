@@ -7,6 +7,9 @@ import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.belonogov.task_service.domain.dto.mapper.CompanyMapper;
+import ru.belonogov.task_service.domain.dto.mapper.EmployeeMapper;
+import ru.belonogov.task_service.domain.dto.mapper.TaskMapper;
 import ru.belonogov.task_service.domain.repository.CompanyDao;
 import ru.belonogov.task_service.domain.repository.EmployeeDao;
 import ru.belonogov.task_service.domain.repository.TaskDao;
@@ -83,14 +86,17 @@ public class MyApplicationContextListener implements ServletContextListener {
 
     private void serviceContextInit(ServletContext servletContext) {
         CompanyDao companyDao = new CompanyDaoImpl();
+        CompanyMapper companyMapper = CompanyMapper.INSTANCE;
         EmployeeDao employeeDao = new EmployeeDaoImpl();
+        EmployeeMapper employeeMapper = EmployeeMapper.INSTANCE;
         TaskDao taskDao = new TaskDaoImpl();
+        TaskMapper taskMapper = TaskMapper.INSTANCE;
         ObjectMapper objectMapper = new ObjectMapper();
         Converter converter = new Converter(objectMapper);
 
-        CompanyService companyService = new CompanyServiceImpl(companyDao);
-        EmployeeService employeeService = new EmployeeServiceImpl(employeeDao, companyDao);
-        TaskService taskService = new TaskServiceImpl(taskDao);
+        CompanyService companyService = new CompanyServiceImpl(companyDao, companyMapper);
+        EmployeeService employeeService = new EmployeeServiceImpl(employeeDao, companyDao, employeeMapper);
+        TaskService taskService = new TaskServiceImpl(taskMapper, taskDao);
         servletContext.setAttribute("companyService", companyService);
         servletContext.setAttribute("employeeService", employeeService);
         servletContext.setAttribute("taskService", taskService);

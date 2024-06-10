@@ -1,6 +1,5 @@
 package ru.belonogov.task_service.domain.entity;
 
-import java.util.List;
 import java.util.Set;
 
 public class Task {

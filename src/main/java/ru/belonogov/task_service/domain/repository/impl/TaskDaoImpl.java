@@ -2,13 +2,14 @@ package ru.belonogov.task_service.domain.repository.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.belonogov.task_service.domain.dto.request.TaskRequest;
-import ru.belonogov.task_service.domain.dto.request.TaskUpdateRequest;
 import ru.belonogov.task_service.domain.entity.Company;
 import ru.belonogov.task_service.domain.entity.Employee;
 import ru.belonogov.task_service.domain.entity.Task;
 import ru.belonogov.task_service.domain.entity.TaskStatus;
+import ru.belonogov.task_service.domain.exception.DatabaseInterectionException;
+import ru.belonogov.task_service.domain.exception.EmployeeNotFoundException;
 import ru.belonogov.task_service.domain.exception.SavingTaskException;
+import ru.belonogov.task_service.domain.exception.UpdateException;
 import ru.belonogov.task_service.domain.repository.TaskDao;
 import ru.belonogov.task_service.util.DataSource;
 
@@ -52,7 +53,7 @@ public class TaskDaoImpl implements TaskDao {
     @Override
     public Optional<Task> findById(Long id) {
         String sqlFindById = """
-                select t.*, e.*, c.* from tasks_employee te
+                select * from tasks_employee te
                 join tasks t on te.task_id = t.id
                 join employees e on e.id = te.employee_id
                 join company c on c.id = e.company_id
@@ -67,22 +68,22 @@ public class TaskDaoImpl implements TaskDao {
             while (resultSet.next()) {
                 if (result == null) {
                     result = new Task();
-                    result.setId(resultSet.getLong("t.id"));
-                    result.setName(resultSet.getString("t.name"));
+                    result.setId(resultSet.getLong("task_id"));
+                    result.setName(resultSet.getString(4));
                     result.setDescription(resultSet.getString("description"));
-                    result.setRating(resultSet.getInt("t.rating"));
+                    result.setRating(resultSet.getInt(6));
                     result.setTaskStatus(TaskStatus.valueOf(resultSet.getString("task_status")));
                     result.setEmployees(employeeHashSet);
                 }
                 Company company = new Company();
-                company.setId(resultSet.getLong("c.id"));
-                company.setName(resultSet.getString("c.name"));
+                company.setId(resultSet.getLong(12));
+                company.setName(resultSet.getString(13));
                 company.setEmployees(emptySet);
                 Employee employee = new Employee();
-                employee.setId(resultSet.getLong("e.id"));
+                employee.setId(resultSet.getLong("employee_id"));
                 employee.setFirstName(resultSet.getString("first_name"));
                 employee.setLastName(resultSet.getString("last_name"));
-                employee.setRating(resultSet.getInt("e.rating"));
+                employee.setRating(resultSet.getInt(11));
                 employee.setCompany(company);
                 employee.setTasks(emptySet);
                 employeeHashSet.add(employee);
@@ -99,7 +100,7 @@ public class TaskDaoImpl implements TaskDao {
     @Override
     public List<Task> findAllByEmployee(Long id) {
         String sqlFindByEmployee = """
-                select t.*, e.* from tasks t
+                select t.* from tasks t
                 join tasks_employee te on t.id = te.task_id
                 join employees e on te.employee_id = e.id
                 where e.id = ? """;
@@ -111,7 +112,7 @@ public class TaskDaoImpl implements TaskDao {
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 Task task = new Task();
-                task.setId(resultSet.getLong("t.id"));
+                task.setId(resultSet.getLong("id"));
                 task.setName(resultSet.getString("name"));
                 task.setDescription(resultSet.getString("description"));
                 task.setRating(resultSet.getInt("rating"));
@@ -123,7 +124,7 @@ public class TaskDaoImpl implements TaskDao {
             return result;
         } catch (SQLException e) {
             logger.error(e.getMessage());
-            return Collections.emptyList();
+            throw new EmployeeNotFoundException("Работник не найден");
         }
     }
 
@@ -152,35 +153,33 @@ public class TaskDaoImpl implements TaskDao {
             update.setString(4, taskStatus.name());
             update.setLong(5, id);
             int executeUpdate = update.executeUpdate();
-            Set<Employee> employeeHashSet = new HashSet<>();
-            if (executeUpdate > 0) {
-                findEmployee.setLong(1, id);
-                ResultSet resultSet = findEmployee.executeQuery();
-                while (resultSet.next()) {
-                    if (result == null) {
-                        result = new Task();
-                        result.setId(id);
-                        result.setName(name);
-                        result.setDescription(description);
-                        result.setRating(rating);
-                        result.setTaskStatus(taskStatus);
-                    }
-                    Employee employee = new Employee();
-                    Company company = new Company();
-                    company.setId(resultSet.getLong("c.id"));
-                    company.setName(resultSet.getString("c.name"));
-                    company.setEmployees(emptySet);
-                    employee.setId(resultSet.getLong("e.id"));
-                    employee.setFirstName(resultSet.getString("first_name"));
-                    employee.setLastName(resultSet.getString("last_name"));
-                    employee.setRating(resultSet.getInt("e.rating"));
-                    employee.setCompany(company);
-                    employee.setTasks(emptySet);
-                    employeeHashSet.add(employee);
-                }
-                result.setEmployees(employeeHashSet);
+            if (executeUpdate == 0) {
+                throw new UpdateException("Данные работника не обновлены");
             }
-
+            Set<Employee> employeeHashSet = new HashSet<>();
+            result = new Task();
+            result.setId(id);
+            result.setName(name);
+            result.setDescription(description);
+            result.setRating(rating);
+            result.setTaskStatus(taskStatus);
+            result.setEmployees(employeeHashSet);
+            findEmployee.setLong(1, id);
+            ResultSet resultSet = findEmployee.executeQuery();
+            while (resultSet.next()) {
+                Employee employee = new Employee();
+                Company company = new Company();
+                company.setId(resultSet.getLong("c.id"));
+                company.setName(resultSet.getString("c.name"));
+                company.setEmployees(emptySet);
+                employee.setId(resultSet.getLong("e.id"));
+                employee.setFirstName(resultSet.getString("first_name"));
+                employee.setLastName(resultSet.getString("last_name"));
+                employee.setRating(resultSet.getInt("e.rating"));
+                employee.setCompany(company);
+                employee.setTasks(emptySet);
+                employeeHashSet.add(employee);
+            }
         } catch (SQLException e) {
             logger.error(e.getMessage());
         }
@@ -217,10 +216,13 @@ public class TaskDaoImpl implements TaskDao {
         try (Connection connection = DataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(sqlDelete)) {
             preparedStatement.setLong(1, id);
-            preparedStatement.executeUpdate();
+            int delete = preparedStatement.executeUpdate();
+            if(delete == 0) {
+                return false;
+            }
         } catch (SQLException e) {
             logger.error(e.getMessage());
-            return false;
+            throw new DatabaseInterectionException("Невозможно удалить задание");
         }
 
         return true;

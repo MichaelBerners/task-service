@@ -2,11 +2,11 @@ package ru.belonogov.task_service.domain.repository.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.belonogov.task_service.domain.dto.request.EmployeeUpdateRequest;
 import ru.belonogov.task_service.domain.entity.Company;
 import ru.belonogov.task_service.domain.entity.Employee;
 import ru.belonogov.task_service.domain.entity.Task;
 import ru.belonogov.task_service.domain.entity.TaskStatus;
+import ru.belonogov.task_service.domain.exception.DatabaseInterectionException;
 import ru.belonogov.task_service.domain.exception.SaveException;
 import ru.belonogov.task_service.domain.exception.TaskNotFoundException;
 import ru.belonogov.task_service.domain.exception.UpdateException;
@@ -203,10 +203,13 @@ public class EmployeeDaoImpl implements EmployeeDao {
         try (Connection connection = DataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(sqlDelete)) {
             preparedStatement.setLong(1, id);
-            preparedStatement.executeUpdate();
+            int delete = preparedStatement.executeUpdate();
+            if(delete == 0) {
+                return false;
+            }
         } catch (SQLException e) {
             logger.error(e.getMessage());
-            return false;
+            throw new DatabaseInterectionException("Невозможно удалить сотрудника");
         }
 
         return true;

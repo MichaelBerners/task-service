@@ -18,10 +18,11 @@ import java.util.stream.Collectors;
 
 public class TaskServiceImpl implements TaskService {
 
-    private final TaskMapper taskMapper = TaskMapper.INSTANCE;
+    private final TaskMapper taskMapper;
     private final TaskDao taskDao;
 
-    public TaskServiceImpl(TaskDao taskDao) {
+    public TaskServiceImpl(TaskMapper taskMapper, TaskDao taskDao) {
+        this.taskMapper = taskMapper;
         this.taskDao = taskDao;
     }
 

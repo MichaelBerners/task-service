@@ -21,15 +21,15 @@ public class FindEmployeeServlet extends HttpServlet {
 
     @Override
     public void init(ServletConfig config) throws ServletException {
+        super.init(config);
         employeeService = (EmployeeService) getServletContext().getAttribute("employeeService");
         converter = (Converter) getServletContext().getAttribute("converter");
-        super.init(config);
     }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("application/json");
-        req.setCharacterEncoding("UTF-8");
+        resp.setCharacterEncoding("UTF-8");
         try {
             if(req.getParameter("id") != null) {
                 Long id = converter.getLong(req, "id");

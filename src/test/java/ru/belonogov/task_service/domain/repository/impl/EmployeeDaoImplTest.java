@@ -7,6 +7,7 @@ import ru.belonogov.task_service.PostgresTestContainer;
 import ru.belonogov.task_service.domain.entity.Company;
 import ru.belonogov.task_service.domain.entity.Employee;
 import ru.belonogov.task_service.domain.entity.Task;
+import ru.belonogov.task_service.domain.exception.DatabaseInterectionException;
 import ru.belonogov.task_service.domain.exception.SaveException;
 import ru.belonogov.task_service.domain.exception.UpdateException;
 import ru.belonogov.task_service.domain.repository.EmployeeDao;
@@ -69,13 +70,11 @@ class EmployeeDaoImplTest {
     @Test
     void testFindById_shouldReturnOptionalOfEmployee_whenEmployeeExist() {
         assertTrue(employeeDao.findById(1L).isPresent());
-        System.out.println();
     }
 
     @Test
     void testFindById_shouldReturnOptionalOfEmpty_whenEmployeeIsNotExist() {
         assertFalse(employeeDao.findById(100L).isPresent());
-        System.out.println();
     }
 
     @Test
@@ -113,7 +112,7 @@ class EmployeeDaoImplTest {
 
     @Test
     void testAddNewTask_shouldReturnTrue_whenEmployeeAndTaskExist() {
-        assertThat(employeeDao.addNewTask(3L, 3L)).isTrue();
+        assertThat(employeeDao.addNewTask(4L, 3L)).isTrue();
     }
 
     @Test
@@ -123,13 +122,15 @@ class EmployeeDaoImplTest {
 
     @Test
     void testDelete_shouldReturnTrue_whenEmployeeDelete() {
-        boolean result = employeeDao.delete(2L);
-        assertThat(result).isTrue();
+        assertThat(employeeDao.delete(2L)).isTrue();
     }
 
     @Test
-    void testDelete_shouldReturnFalse_whenEmployeeIsNotDelete() {
-        boolean result = employeeDao.delete(1L);
-        assertThat(result).isFalse();
+    void testDelete_shouldReturnFalse_whenEmployeeIsExist() {
+        assertThat(employeeDao.delete(100L)).isFalse();
+    }
+    @Test
+    void testDelete_shouldReturnDatabaseInterectionException_whenEmployeeHasARelationship() {
+        assertThrows(DatabaseInterectionException.class, () -> employeeDao.delete(1L));
     }
 }

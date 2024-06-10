@@ -2,7 +2,6 @@ package ru.belonogov.task_service.domain.repository.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.belonogov.task_service.domain.dto.request.CompanyUpdateRequest;
 import ru.belonogov.task_service.domain.entity.Company;
 import ru.belonogov.task_service.domain.entity.Employee;
 import ru.belonogov.task_service.domain.exception.SaveException;

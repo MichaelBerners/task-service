@@ -12,16 +12,16 @@ import ru.belonogov.task_service.util.Converter;
 import java.io.IOException;
 
 @WebServlet("/employee/delete")
-public class DeleteEmployee extends HttpServlet {
+public class DeleteEmployeeServlrt extends HttpServlet {
 
     private EmployeeService employeeService;
     private Converter converter;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
+        super.init(config);
         employeeService = (EmployeeService) getServletContext().getAttribute("employeeService");
         converter = (Converter) getServletContext().getAttribute("converter");
-        super.init(config);
     }
 
     @Override

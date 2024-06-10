@@ -7,8 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import ru.belonogov.task_service.domain.dto.request.CompanySaveRequest;
+import ru.belonogov.task_service.domain.dto.request.CompanyUpdateRequest;
 import ru.belonogov.task_service.domain.dto.response.CompanyResponse;
 import ru.belonogov.task_service.service.CompanyService;
 import ru.belonogov.task_service.util.Converter;
@@ -16,17 +15,18 @@ import ru.belonogov.task_service.util.Converter;
 import java.io.IOException;
 
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
 
-class CreateCompanyServletTest {
+class UpdateCompanyServletTest {
 
     private CompanyService companyService;
     private Converter converter;
-    private CreateCompanyServlet createCompanyServlet;
+    private UpdateCompanyServlet updateCompanyServlet;
 
 
     @BeforeEach
     void init() throws ServletException {
-        createCompanyServlet = new CreateCompanyServlet();
+        updateCompanyServlet = new UpdateCompanyServlet();
         ServletConfig config = mock(ServletConfig.class);
         ServletContext context = mock(ServletContext.class);
         converter = mock(Converter.class);
@@ -34,39 +34,41 @@ class CreateCompanyServletTest {
         when(config.getServletContext()).thenReturn(context);
         when(context.getAttribute("converter")).thenReturn(converter);
         when(context.getAttribute("companyService")).thenReturn(companyService);
-        createCompanyServlet.init(config);
+        updateCompanyServlet.init(config);
     }
+
     @Test
-    void TestDoPost_shouldReturnStatus201() throws ServletException, IOException {
+    void TestDoPost_shouldReturnStatus200() throws ServletException, IOException {
         HttpServletRequest req = mock(HttpServletRequest.class);
         HttpServletResponse resp = mock(HttpServletResponse.class);
-        CompanySaveRequest companySaveRequest = mock(CompanySaveRequest.class);
+        CompanyUpdateRequest companyUpdateRequest = mock(CompanyUpdateRequest.class);
         CompanyResponse companyResponse = mock(CompanyResponse.class);
-        when(converter.getRequestBody(req, CompanySaveRequest.class)).thenReturn(companySaveRequest);
-        when(companyService.create(companySaveRequest)).thenReturn(companyResponse);
+        when(converter.getRequestBody(req, CompanyUpdateRequest.class)).thenReturn(companyUpdateRequest);
+        when(companyService.update(companyUpdateRequest)).thenReturn(companyResponse);
 
-        createCompanyServlet.doPost(req, resp);
+        updateCompanyServlet.doPost(req, resp);
 
-        verify(converter).getRequestBody(req, CompanySaveRequest.class);
-        verify(companyService).create(companySaveRequest);
+        verify(converter).getRequestBody(req, CompanyUpdateRequest.class);
+        verify(companyService).update(companyUpdateRequest);
         verify(converter).getResponseBody(resp, companyResponse);
         verify(resp).setContentType("application/json");
         verify(resp).setCharacterEncoding("UTF-8");
-        verify(resp).setStatus(HttpServletResponse.SC_CREATED);
+        verify(resp).setStatus(HttpServletResponse.SC_OK);
     }
 
     @Test
     void TestDoPost_shouldReturnStatus400() throws ServletException, IOException {
         HttpServletRequest req = mock(HttpServletRequest.class);
         HttpServletResponse resp = mock(HttpServletResponse.class);
-        CompanySaveRequest companySaveRequest = mock(CompanySaveRequest.class);
-        when(converter.getRequestBody(req, CompanySaveRequest.class)).thenReturn(companySaveRequest);
-        when(companyService.create(companySaveRequest)).thenThrow(RuntimeException.class);
+        CompanyUpdateRequest companyUpdateRequest = mock(CompanyUpdateRequest.class);
+        CompanyResponse companyResponse = mock(CompanyResponse.class);
+        when(converter.getRequestBody(req, CompanyUpdateRequest.class)).thenReturn(companyUpdateRequest);
+        when(companyService.update(companyUpdateRequest)).thenThrow(RuntimeException.class);
 
-        createCompanyServlet.doPost(req, resp);
+        updateCompanyServlet.doPost(req, resp);
 
-        verify(converter).getRequestBody(req, CompanySaveRequest.class);
-        verify(companyService).create(companySaveRequest);
+        verify(converter).getRequestBody(req, CompanyUpdateRequest.class);
+        verify(companyService).update(companyUpdateRequest);
         verify(resp).setContentType("application/json");
         verify(resp).setCharacterEncoding("UTF-8");
         verify(resp).setStatus(HttpServletResponse.SC_BAD_REQUEST);

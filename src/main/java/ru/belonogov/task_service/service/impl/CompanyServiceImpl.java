@@ -12,10 +12,11 @@ import ru.belonogov.task_service.service.CompanyService;
 public class CompanyServiceImpl implements CompanyService {
 
     private final CompanyDao companyDao;
-    private final CompanyMapper companyMapper = CompanyMapper.INSTANCE;
+    private final CompanyMapper companyMapper;
 
-    public CompanyServiceImpl(CompanyDao companyDao) {
+    public CompanyServiceImpl(CompanyDao companyDao, CompanyMapper companyMapper) {
         this.companyDao = companyDao;
+        this.companyMapper = companyMapper;
     }
 
     @Override

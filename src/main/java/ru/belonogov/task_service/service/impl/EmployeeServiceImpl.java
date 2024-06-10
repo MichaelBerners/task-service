@@ -12,7 +12,6 @@ import ru.belonogov.task_service.domain.exception.CompanyNotFoundException;
 import ru.belonogov.task_service.domain.exception.EmployeeNotFoundException;
 import ru.belonogov.task_service.domain.repository.CompanyDao;
 import ru.belonogov.task_service.domain.repository.EmployeeDao;
-import ru.belonogov.task_service.service.CompanyService;
 import ru.belonogov.task_service.service.EmployeeService;
 
 import java.util.Collections;
@@ -23,11 +22,12 @@ import java.util.stream.Collectors;
 public class EmployeeServiceImpl implements EmployeeService {
     private final EmployeeDao employeeDao;
     private final CompanyDao companyDao;
-    private final EmployeeMapper employeeMapper = EmployeeMapper.INSTANCE;
+    private final EmployeeMapper employeeMapper;
 
-    public EmployeeServiceImpl(EmployeeDao employeeDao, CompanyDao companyDao) {
+    public EmployeeServiceImpl(EmployeeDao employeeDao, CompanyDao companyDao, EmployeeMapper employeeMapper) {
         this.employeeDao = employeeDao;
         this.companyDao = companyDao;
+        this.employeeMapper = employeeMapper;
     }
 
     @Override

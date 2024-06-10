@@ -29,6 +29,8 @@ insert into tasks (name, description, rating, task_status)
 values ('Заливка фундамента', 'требуется произвести заливку ленточного фундамента : V = 10m3', 5, 'IN_PROGRESS');
 insert into tasks (name, description, rating, task_status)
 values ('Штукатурные работы', 'требуется произвести штукатурные работы гипсовой штукатуркой : S = 100m2', 6, 'IN_PROGRESS');
+insert into tasks (name, description, rating, task_status)
+values ('Кровельные работы', 'требуется произвести кровельные работы по сборке стропильной системы : S = 300m2', 7, 'SEARCH_FOR_EMPLOYEES');
 
 --changeset belonogov:4
 insert into tasks_employee (task_id, employee_id) values (1, 5);

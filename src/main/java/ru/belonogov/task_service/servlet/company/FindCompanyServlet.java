@@ -20,9 +20,9 @@ public class FindCompanyServlet extends HttpServlet {
 
     @Override
     public void init(ServletConfig config) throws ServletException {
+        super.init(config);
         companyService = (CompanyService) getServletContext().getAttribute("companyService");
         converter = (Converter) getServletContext().getAttribute("converter");
-        super.init(config);
     }
 
     @Override

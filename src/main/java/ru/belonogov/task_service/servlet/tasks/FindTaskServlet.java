@@ -21,9 +21,9 @@ public class FindTaskServlet extends HttpServlet {
 
     @Override
     public void init(ServletConfig config) throws ServletException {
+        super.init(config);
         taskService = (TaskService) getServletContext().getAttribute("taskService");
         converter = (Converter) getServletContext().getAttribute("converter");
-        super.init(config);
     }
 
     @Override
