@@ -25,7 +25,7 @@ public class CompanyDaoImpl implements CompanyDao {
             preparedStatement.setString(1, company.getName());
             int save = preparedStatement.executeUpdate();
             if (save == 0) {
-                throw new SaveException("Ошибка сохранения нового пользователя");
+                throw new SaveException("Ошибка сохранения новой компании");
             }
             ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
             generatedKeys.next();
@@ -33,7 +33,7 @@ public class CompanyDaoImpl implements CompanyDao {
             company.setEmployees(Collections.emptySet());
         } catch (SQLException e) {
             logger.error(e.getMessage());
-            throw new SaveException("Ошибка сохранения нового пользователя");
+            throw new SaveException("Ошибка сохранения новой компании");
         }
 
         return company;

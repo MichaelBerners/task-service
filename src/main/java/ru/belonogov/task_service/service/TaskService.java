@@ -20,5 +20,5 @@ public interface TaskService {
 
     void addNewEmployeeToTask(TaskEmployeeRequest taskEmployeeRequest);
 
-    void delete (Long id);
+    boolean delete (Long id);
 }

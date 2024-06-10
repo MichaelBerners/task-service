@@ -6,6 +6,7 @@ import ru.belonogov.task_service.domain.dto.request.CompanyUpdateRequest;
 import ru.belonogov.task_service.domain.dto.response.CompanyResponse;
 import ru.belonogov.task_service.domain.entity.Company;
 import ru.belonogov.task_service.domain.exception.CompanyNotFoundException;
+import ru.belonogov.task_service.domain.exception.UpdateException;
 import ru.belonogov.task_service.domain.repository.CompanyDao;
 import ru.belonogov.task_service.service.CompanyService;
 
@@ -47,13 +48,19 @@ public class CompanyServiceImpl implements CompanyService {
         Company company = new Company();
         company.setId(companyRequest.getId());
         company.setName(company.getName());
+        if(companyDao.findById(company.getId()).isEmpty()) {
+            throw new UpdateException("Компания не найдена");
+        }
         Company save = companyDao.update(company);
 
         return companyMapper.companyToCompanyResponse(save);
     }
 
     @Override
-    public void delete(Long id) {
-        companyDao.delete(id);
+    public boolean delete(Long id) {
+        if(companyDao.findById(id).isEmpty()){
+            throw new UpdateException("Компания не найдена");
+        }
+        return companyDao.delete(id);
     }
 }

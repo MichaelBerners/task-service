@@ -95,8 +95,8 @@ public class MyApplicationContextListener implements ServletContextListener {
         Converter converter = new Converter(objectMapper);
 
         CompanyService companyService = new CompanyServiceImpl(companyDao, companyMapper);
-        EmployeeService employeeService = new EmployeeServiceImpl(employeeDao, companyDao, employeeMapper);
-        TaskService taskService = new TaskServiceImpl(taskMapper, taskDao);
+        EmployeeService employeeService = new EmployeeServiceImpl(employeeDao, companyDao, taskDao, employeeMapper);
+        TaskService taskService = new TaskServiceImpl(taskMapper, taskDao, employeeDao);
         servletContext.setAttribute("companyService", companyService);
         servletContext.setAttribute("employeeService", employeeService);
         servletContext.setAttribute("taskService", taskService);

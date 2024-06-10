@@ -10,8 +10,10 @@ import ru.belonogov.task_service.domain.entity.Employee;
 import ru.belonogov.task_service.domain.exception.AddNewTaskException;
 import ru.belonogov.task_service.domain.exception.CompanyNotFoundException;
 import ru.belonogov.task_service.domain.exception.EmployeeNotFoundException;
+import ru.belonogov.task_service.domain.exception.UpdateException;
 import ru.belonogov.task_service.domain.repository.CompanyDao;
 import ru.belonogov.task_service.domain.repository.EmployeeDao;
+import ru.belonogov.task_service.domain.repository.TaskDao;
 import ru.belonogov.task_service.service.EmployeeService;
 
 import java.util.Collections;
@@ -22,11 +24,13 @@ import java.util.stream.Collectors;
 public class EmployeeServiceImpl implements EmployeeService {
     private final EmployeeDao employeeDao;
     private final CompanyDao companyDao;
+    private final TaskDao taskDao;
     private final EmployeeMapper employeeMapper;
 
-    public EmployeeServiceImpl(EmployeeDao employeeDao, CompanyDao companyDao, EmployeeMapper employeeMapper) {
+    public EmployeeServiceImpl(EmployeeDao employeeDao, CompanyDao companyDao, TaskDao taskDao, EmployeeMapper employeeMapper) {
         this.employeeDao = employeeDao;
         this.companyDao = companyDao;
+        this.taskDao = taskDao;
         this.employeeMapper = employeeMapper;
     }
 
@@ -55,6 +59,9 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public List<EmployeeResponse> findAllByTask(String taskName) {
         List<Employee> allByTask = employeeDao.findAllByTask(taskName);
+        if(allByTask.isEmpty()) {
+            return Collections.emptyList();
+        }
         List<EmployeeResponse> result = allByTask.stream()
                 .map($ -> employeeMapper.employeeToEmployeeResponse($))
                 .collect(Collectors.toList());
@@ -67,23 +74,29 @@ public class EmployeeServiceImpl implements EmployeeService {
         Employee employee = new Employee();
         employee.setId(employee.getId());
         employee.setRating(employee.getRating());
+        if(employeeDao.findById(employee.getId()).isEmpty()) {
+            throw new UpdateException("Работник которого требуется удалить не найден");
+        }
         Employee employeeUpdate = employeeDao.update(employee);
 
-        return employeeMapper.employeeToEmployeeResponse(employee);
+        return employeeMapper.employeeToEmployeeResponse(employeeUpdate);
     }
 
     @Override
     public void addNewTask(TaskEmployeeRequest taskEmployeeRequest) {
         Long taskId = taskEmployeeRequest.getTaskId();
         Long employeeId = taskEmployeeRequest.getEmployeeId();
-
-        if(!employeeDao.addNewTask(taskId, employeeId)) {
+        if(taskDao.findById(taskId).isEmpty() || employeeDao.findById(employeeId).isEmpty()) {
             throw new AddNewTaskException("Ошибка добавления нового задания работнику");
         }
+        employeeDao.addNewTask(taskId, employeeId);
     }
 
     @Override
-    public void delete(Long id) {
-        employeeDao.delete(id);
+    public boolean delete(Long id) {
+        if(employeeDao.findById(id).isEmpty()) {
+            throw new UpdateException("Работник которого требуется удалить не найден");
+        }
+        return (employeeDao.delete(id));
     }
 }
