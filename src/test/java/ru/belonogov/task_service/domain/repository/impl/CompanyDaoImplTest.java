@@ -1,12 +1,8 @@
 package ru.belonogov.task_service.domain.repository.impl;
 
-import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.PostgreSQLContainer;
 import ru.belonogov.task_service.PostgresTestContainer;
-import ru.belonogov.task_service.domain.dto.request.CompanyUpdateRequest;
 import ru.belonogov.task_service.domain.entity.Company;
 import ru.belonogov.task_service.domain.exception.UpdateException;
 import ru.belonogov.task_service.domain.repository.CompanyDao;

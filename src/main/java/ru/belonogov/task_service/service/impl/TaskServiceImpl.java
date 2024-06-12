@@ -7,7 +7,6 @@ import ru.belonogov.task_service.domain.dto.request.TaskUpdateRequest;
 import ru.belonogov.task_service.domain.dto.response.TaskResponse;
 import ru.belonogov.task_service.domain.entity.Task;
 import ru.belonogov.task_service.domain.entity.TaskStatus;
-import ru.belonogov.task_service.domain.exception.AddNewEmployeeException;
 import ru.belonogov.task_service.domain.exception.AddNewTaskException;
 import ru.belonogov.task_service.domain.exception.TaskNotFoundException;
 import ru.belonogov.task_service.domain.exception.UpdateException;
@@ -36,7 +35,7 @@ public class TaskServiceImpl implements TaskService {
         TaskStatus newTask = TaskStatus.SEARCH_FOR_EMPLOYEES;
         Task task = new Task();
         task.setName(taskRequest.getName());
-        task.setDescription(task.getDescription());
+        task.setDescription(taskRequest.getDescription());
         task.setRating(taskRequest.getRating());
         task.setTaskStatus(newTask);
         task.setEmployees(Collections.emptySet());
@@ -92,10 +91,10 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public boolean delete(Long id) {
+    public void delete(Long id) {
         if (taskDao.findById(id).isEmpty()){
             throw new UpdateException("Задание не найдено");
         }
-        return taskDao.delete(id);
+        taskDao.delete(id);
     }
 }

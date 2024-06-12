@@ -1,20 +1,16 @@
 package ru.belonogov.task_service.domain.repository.impl;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import ru.belonogov.task_service.PostgresTestContainer;
 import ru.belonogov.task_service.domain.entity.Company;
 import ru.belonogov.task_service.domain.entity.Employee;
-import ru.belonogov.task_service.domain.entity.Task;
 import ru.belonogov.task_service.domain.exception.DatabaseInterectionException;
 import ru.belonogov.task_service.domain.exception.SaveException;
 import ru.belonogov.task_service.domain.exception.UpdateException;
 import ru.belonogov.task_service.domain.repository.EmployeeDao;
 
 import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;

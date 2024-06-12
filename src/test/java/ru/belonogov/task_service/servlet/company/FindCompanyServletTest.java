@@ -12,7 +12,6 @@ import ru.belonogov.task_service.service.CompanyService;
 import ru.belonogov.task_service.util.Converter;
 
 import java.io.IOException;
-import java.net.http.HttpRequest;
 
 import static org.mockito.Mockito.*;
 

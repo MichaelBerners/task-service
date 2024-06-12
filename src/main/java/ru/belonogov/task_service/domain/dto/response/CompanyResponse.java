@@ -1,6 +1,5 @@
 package ru.belonogov.task_service.domain.dto.response;
 
-import java.util.List;
 import java.util.Set;
 
 public class CompanyResponse {

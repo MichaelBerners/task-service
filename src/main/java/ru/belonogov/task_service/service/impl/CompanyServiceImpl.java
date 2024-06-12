@@ -47,7 +47,7 @@ public class CompanyServiceImpl implements CompanyService {
     public CompanyResponse update(CompanyUpdateRequest companyRequest) {
         Company company = new Company();
         company.setId(companyRequest.getId());
-        company.setName(company.getName());
+        company.setName(companyRequest.getName());
         if(companyDao.findById(company.getId()).isEmpty()) {
             throw new UpdateException("Компания не найдена");
         }
@@ -57,10 +57,10 @@ public class CompanyServiceImpl implements CompanyService {
     }
 
     @Override
-    public boolean delete(Long id) {
+    public void delete(Long id) {
         if(companyDao.findById(id).isEmpty()){
             throw new UpdateException("Компания не найдена");
         }
-        return companyDao.delete(id);
+        companyDao.delete(id);
     }
 }

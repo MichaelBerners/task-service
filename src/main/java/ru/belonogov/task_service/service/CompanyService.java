@@ -14,6 +14,6 @@ public interface CompanyService {
 
     CompanyResponse update(CompanyUpdateRequest companyUpdateRequest);
 
-    boolean delete(Long id);
+    void delete(Long id);
 
 }

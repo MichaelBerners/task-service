@@ -1,12 +1,10 @@
 package ru.belonogov.task_service.service.impl;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.belonogov.task_service.domain.dto.mapper.EmployeeMapper;
-import ru.belonogov.task_service.domain.dto.request.CompanySaveRequest;
 import ru.belonogov.task_service.domain.dto.request.EmployeeRequest;
 import ru.belonogov.task_service.domain.dto.request.EmployeeUpdateRequest;
 import ru.belonogov.task_service.domain.dto.request.TaskEmployeeRequest;
@@ -43,9 +41,11 @@ class EmployeeServiceImplTest {
     private EmployeeMapper employeeMapper;
     @InjectMocks
     private EmployeeServiceImpl employeeService;
+    @Captor
+    private ArgumentCaptor<Employee> employeeArgumentCaptor;
 
 
-    //@Test
+    @Test
     void testSave_shouldReturnEmployeeDAO_whenCompanyExist() {
         EmployeeRequest employeeRequest = new EmployeeRequest();
         employeeRequest.setFirstName("Igor");
@@ -53,23 +53,24 @@ class EmployeeServiceImplTest {
         employeeRequest.setCompanyName("Gazprom");
         Company company = new Company();
         company.setName(employeeRequest.getCompanyName());
-        when(companyDao.findByName(employeeRequest.getCompanyName())).thenReturn(Optional.ofNullable(company));
-        when(employeeDao.save(argThat(arg -> {
-            assertThat(arg.getCompany().getName().equals("Gazprom")).isTrue();
-            assertThat(arg.getRating() == 5).isTrue();
-            return true;
-        }))).thenAnswer(e -> e.getArgument(0));
-        when(employeeMapper.employeeToEmployeeResponse(argThat(arg -> {
-            assertThat(arg.getCompany().getName().equals("Gazprom")).isTrue();
-            assertThat(arg.getRating() == 5).isTrue();
-            return true;
-        }))).thenReturn(mock(EmployeeResponse.class));
+        Employee employee = new Employee();
+        EmployeeResponse employeeResponse = new EmployeeResponse();
+        when(companyDao.findByName("Gazprom")).thenReturn(Optional.of(company));
+        when(employeeDao.save(employeeArgumentCaptor.capture())).thenReturn(employee);
+        when(employeeMapper.employeeToEmployeeResponse(employee)).thenReturn(employeeResponse);
 
-        employeeService.save(employeeRequest);
+        EmployeeResponse result = employeeService.save(employeeRequest);
 
-        verify(companyDao).findById(any());
+        assertThat(result).isEqualTo(employeeResponse);
+        assertThat(employeeArgumentCaptor.getValue())
+                .matches(e -> e.getFirstName().equals(employeeRequest.getFirstName()))
+                .matches(e -> e.getLastName().equals(employeeRequest.getLastName()))
+                .matches(e -> e.getRating() == 5)
+                .matches(e -> e.getTasks().isEmpty())
+                .matches(e -> e.getCompany().getName().equals(employeeRequest.getCompanyName()));
+        verify(companyDao).findByName("Gazprom");
         verify(employeeDao).save(any());
-        verify(employeeMapper).employeeToEmployeeResponse(any());
+        verify(employeeMapper).employeeToEmployeeResponse(employee);
 
     }
 
@@ -84,39 +85,49 @@ class EmployeeServiceImplTest {
         assertThrows(CompanyNotFoundException.class, () -> employeeService.save(employeeRequest));
     }
 
-    //@Test
-    void testFindById_shouldReturnDTO_whenEmployeeExist() {
+    @Test
+    void testFindById_shouldReturnEmployeeDTO_whenEmployeeExist() {
         Long id = 1L;
         Employee employee = new Employee();
         employee.setId(id);
-        when(employeeDao.findById(id)).thenReturn(Optional.ofNullable(employee));
-        when(employeeMapper.employeeToEmployeeResponse(employee));
+        EmployeeResponse employeeResponse = new EmployeeResponse();
+        when(employeeDao.findById(id)).thenReturn(Optional.of(employee));
+        when(employeeMapper.employeeToEmployeeResponse(employee)).thenReturn(employeeResponse);
 
-        employeeService.findById(id);
+        EmployeeResponse result = employeeService.findById(id);
 
-        verify(employeeDao.findById(id));
-        verify(employeeMapper.employeeToEmployeeResponse(employee));
+        assertThat(result).isEqualTo(employeeResponse);
+        verify(employeeDao).findById(id);
+        verify(employeeMapper).employeeToEmployeeResponse(employee);
     }
 
     @Test
     void testFindById_shouldReturnEmployeeNotFoundException_whenEmployeeIsNotExist() {
-        Long id = 1L;;
+        Long id = 1L;
         when(employeeDao.findById(id)).thenReturn(Optional.empty());
 
-        assertThrows(EmployeeNotFoundException.class ,() -> employeeService.findById(id));
-
+        assertThrows(EmployeeNotFoundException.class, () -> employeeService.findById(id));
     }
 
-    //@Test
+    @Test//?
     void testFindAllByTask_shouldListEmployeeDAO_whenTaskExist() {
         String taskName = "Заливка фундамента";
-        when(employeeDao.findAllByTask(taskName)).thenReturn(mock(List.class));
-        when(employeeMapper.employeeToEmployeeResponse(any())).thenReturn(mock(EmployeeResponse.class));
+        Employee employee1 = new Employee();
+        Employee employee2 = new Employee();
+        List<Employee> employees = List.of(employee1, employee2);
+        EmployeeResponse employeeResponse = new EmployeeResponse();
+        when(employeeDao.findAllByTask(taskName)).thenReturn(employees);
+        when(employeeMapper.employeeToEmployeeResponse(employeeArgumentCaptor.capture())).thenReturn(employeeResponse);
 
-        employeeService.findAllByTask(taskName);
+        List<EmployeeResponse> result = employeeService.findAllByTask(taskName);
 
+        assertThat(result)
+                .isNotNull()
+                .isNotEmpty();
+        assertThat(employeeArgumentCaptor.getAllValues().contains(employee1)).isTrue();
+        assertThat(employeeArgumentCaptor.getAllValues().contains(employee2)).isTrue();
         verify(employeeDao).findAllByTask(taskName);
-        verify(employeeMapper.employeeToEmployeeResponse(any()));
+        verify(employeeMapper, times(2)).employeeToEmployeeResponse(any());
     }
 
     @Test
@@ -124,52 +135,57 @@ class EmployeeServiceImplTest {
         String taskName = "Заливка фундамента";
         when(employeeDao.findAllByTask(taskName)).thenReturn(Collections.emptyList());
 
-        assertThat(employeeService.findAllByTask(taskName)).isEmpty();
+        List<EmployeeResponse> result = employeeService.findAllByTask(taskName);
 
+        assertThat(result).isEmpty();
         verify(employeeDao).findAllByTask(taskName);
     }
 
-    //@Test
+    @Test
     void testUpdate_shouldEmployeeDTO_whenEmployeeExist() {
         EmployeeUpdateRequest employeeUpdateRequest = new EmployeeUpdateRequest();
         employeeUpdateRequest.setId(1L);
         employeeUpdateRequest.setRating(7);
         Employee employee = new Employee();
-        employee.setId(employeeUpdateRequest.getId());
-        employee.setRating(employeeUpdateRequest.getRating());
-        when(employeeDao.findById(employeeUpdateRequest.getId())).thenReturn(Optional.ofNullable(employee));
-        when(employeeDao.update(employee)).thenReturn(employee);
-        when(employeeMapper.employeeToEmployeeResponse(employee));
+        EmployeeResponse employeeResponse = new EmployeeResponse();
+        when(employeeDao.findById(employeeUpdateRequest.getId())).thenReturn(Optional.of(employee));
+        when(employeeDao.update(employeeArgumentCaptor.capture())).thenReturn(employee);
+        when(employeeMapper.employeeToEmployeeResponse(employee)).thenReturn(employeeResponse);
 
-        employeeService.update(employeeUpdateRequest);
+        EmployeeResponse result = employeeService.update(employeeUpdateRequest);
 
-        verify(employeeDao).findAllByTask(any());
+        assertThat(result).isEqualTo(employeeResponse);
+        assertThat(employeeArgumentCaptor.getValue())
+                .matches(e -> e.getId() == employeeUpdateRequest.getId())
+                .matches(e -> e.getRating() == employeeUpdateRequest.getRating());
+        verify(employeeDao).findById(employeeUpdateRequest.getId());
         verify(employeeDao).update(any());
-        verify(employeeMapper).employeeToEmployeeResponse(any());
+        verify(employeeMapper).employeeToEmployeeResponse(employee);
     }
 
-    //@Test
+    @Test
     void testAddNewTask_whenEmployeeAndTaskExist() {
         TaskEmployeeRequest taskEmployeeRequest = new TaskEmployeeRequest();
         taskEmployeeRequest.setTaskId(1L);
         taskEmployeeRequest.setEmployeeId(2L);
-        when(taskDao.findById(1L)).thenReturn(mock(Optional.class));
-        when(employeeDao.findById(2L)).thenReturn(mock(Optional.class));
+        Task task = new Task();
+        Employee employee = new Employee();
+        when(taskDao.findById(1L)).thenReturn(Optional.of(task));
+        when(employeeDao.findById(2L)).thenReturn(Optional.of(employee));
 
         employeeService.addNewTask(taskEmployeeRequest);
 
-        verify(taskDao.findById(1L));
-        verify(employeeDao.findById(2L));
-        verify(employeeDao.addNewTask(1L, 2L));
+        verify(taskDao).findById(1L);
+        verify(employeeDao).findById(2L);
+        verify(employeeDao).addNewTask(1L, 2L);
     }
 
-    //@Test
+    @Test
     void testAddNewTask_whenEmployeeOrTaskIsNotExist() {
         TaskEmployeeRequest taskEmployeeRequest = new TaskEmployeeRequest();
         taskEmployeeRequest.setTaskId(1L);
         taskEmployeeRequest.setEmployeeId(2L);
         when(taskDao.findById(1L)).thenReturn(Optional.empty());
-        when(employeeDao.findById(2L)).thenReturn(mock(Optional.class));
 
         assertThrows(AddNewTaskException.class, () -> employeeService.addNewTask(taskEmployeeRequest));
     }
@@ -177,7 +193,8 @@ class EmployeeServiceImplTest {
     @Test
     void testDelete_shouldReturnTrue_whenEmployeeExist() {
         Long id = 1L;
-        when(employeeDao.findById(id)).thenReturn(mock(Optional.class));
+        Employee employee = new Employee();
+        when(employeeDao.findById(id)).thenReturn(Optional.of(employee));
 
         employeeService.delete(id);
 

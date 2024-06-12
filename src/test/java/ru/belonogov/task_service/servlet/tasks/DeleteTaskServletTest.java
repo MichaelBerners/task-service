@@ -7,8 +7,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.belonogov.task_service.domain.dto.request.TaskRequest;
-import ru.belonogov.task_service.domain.dto.response.TaskResponse;
 import ru.belonogov.task_service.service.TaskService;
 import ru.belonogov.task_service.util.Converter;
 

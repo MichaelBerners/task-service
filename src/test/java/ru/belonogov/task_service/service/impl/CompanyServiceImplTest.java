@@ -1,9 +1,7 @@
 package ru.belonogov.task_service.service.impl;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mapstruct.Mapper;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.belonogov.task_service.domain.dto.mapper.CompanyMapper;
@@ -14,7 +12,6 @@ import ru.belonogov.task_service.domain.entity.Company;
 import ru.belonogov.task_service.domain.exception.CompanyNotFoundException;
 import ru.belonogov.task_service.domain.exception.UpdateException;
 import ru.belonogov.task_service.domain.repository.CompanyDao;
-import ru.belonogov.task_service.service.CompanyService;
 
 import java.util.Optional;
 
@@ -31,81 +28,101 @@ class CompanyServiceImplTest {
     private CompanyDao companyDao;
     @Mock
     CompanyMapper companyMapper;
+    @Captor
+    ArgumentCaptor<Company> companyArgumentCaptor;
 
 
 
     @Test
-    void testCreate_shouldReturnResponseCompanyDTO() {
+    void testCreate_shouldReturnCompanyDTO_whenCompanySaveInDB() {
         CompanySaveRequest companySaveRequest = new CompanySaveRequest();
         companySaveRequest.setName("Gazprom");
+        Company company = new Company();
+        company.setName(companySaveRequest.getName());
         CompanyResponse companyResponse = new CompanyResponse();
-        companyResponse.setName(companySaveRequest.getName());
-        when(companyDao.save(argThat(arg -> arg.getName().equals(companySaveRequest.getName())))).thenAnswer(e  -> e.getArgument(0));
-        when(companyMapper.companyToCompanyResponse(argThat(arg -> arg.getName().equals(companySaveRequest.getName())))).thenReturn(companyResponse);
+        when(companyDao.save(argThat(arg -> arg.getName().equals(companySaveRequest.getName())))).thenReturn(company);
+        when(companyMapper.companyToCompanyResponse(company)).thenReturn(companyResponse);
 
-        companyService.create(companySaveRequest);
+        CompanyResponse result = companyService.create(companySaveRequest);
 
+        assertThat(result).isEqualTo(companyResponse);
         verify(companyDao).save(any());
         verify(companyMapper).companyToCompanyResponse(any());
     }
 
     @Test
-    void testFindById_shouldReturnDTO() {
+    void testFindById_shouldReturnCompanyDTO_whenCompanyExist() {
         Long id = 3L;
-        when(companyDao.findById(id)).thenReturn(mock(Optional.class));
-        when(companyMapper.companyToCompanyResponse(any())).thenReturn(mock(CompanyResponse.class));
+        Company company = new Company();
+        company.setId(id);
+        CompanyResponse companyResponse = new CompanyResponse();
+        when(companyDao.findById(id)).thenReturn(Optional.of(company));
+        when(companyMapper.companyToCompanyResponse(company)).thenReturn(companyResponse);
 
-        companyService.findById(id);
+        CompanyResponse result = companyService.findById(id);
 
+        assertThat(result).isEqualTo(companyResponse);
         verify(companyDao).findById(id);
         verify(companyMapper).companyToCompanyResponse(any());
     }
 
     @Test
-    void testFindById_shouldReturnCompanyNotFoundException() {
+    void testFindById_shouldReturnCompanyNotFoundException_whenCompanyIsNotExist() {
         Long id = 3L;
         when(companyDao.findById(id)).thenReturn(Optional.empty());
 
         assertThrows(CompanyNotFoundException.class, () -> companyService.findById(id));
-
+        verify(companyDao).findById(3L);
     }
 
     @Test
     void testFindByName_shouldReturnCompanyDTO_whenCompanyExist() {
         String companyName = "Luloil";
-        Company company = mock(Company.class);
-        when(companyDao.findByName(companyName)).thenReturn(Optional.ofNullable(company));
-        when(companyMapper.companyToCompanyResponse(company)).thenReturn(mock(CompanyResponse.class));
+        Company company = new Company();
+        company.setName(companyName);
+        CompanyResponse companyResponse = new CompanyResponse();
+        when(companyDao.findByName(companyName)).thenReturn(Optional.of(company));
+        when(companyMapper.companyToCompanyResponse(company)).thenReturn(companyResponse);
 
-        companyService.findByName(companyName);
+        CompanyResponse result = companyService.findByName(companyName);
 
+        assertThat(result).isEqualTo(companyResponse);
         verify(companyDao).findByName(companyName);
-        verify(companyMapper).companyToCompanyResponse(any());
+        verify(companyMapper).companyToCompanyResponse(company);
     }
 
     @Test
     void testFindByName_shouldReturnCompanyNotFoundException_whenCompanyIsNotExist() {
         String companyName = "Luloil";
-        Company company = mock(Company.class);
+        Company company = new Company();
+        company.setName(companyName);
         when(companyDao.findByName(companyName)).thenReturn(Optional.empty());
 
         assertThrows(CompanyNotFoundException.class,  () -> companyService.findByName(companyName));
     }
 
-    //@Test
+    @Test
     void testUpdate_shouldReturnCompanyResponse_whenCompanyUpdate() {
         CompanyUpdateRequest companyUpdateRequest = new CompanyUpdateRequest();
         companyUpdateRequest.setId(1L);
         companyUpdateRequest.setName("TatNeft");
-        when(companyDao.findById(1L)).thenReturn(mock(Optional.class));
-        when(companyDao.update(argThat(arg -> arg.getId() == 1L && arg.getName().equals("TatNeft")))).thenReturn(mock(Company.class));
-        when(companyMapper.companyToCompanyResponse(any())).thenReturn(mock(CompanyResponse.class));
+        Company company = new Company();
+        company.setId(companyUpdateRequest.getId());
+        company.setName(companyUpdateRequest.getName());
+        CompanyResponse companyResponse = new CompanyResponse();
+        when(companyDao.findById(1L)).thenReturn(Optional.of(company));
+        when(companyDao.update(companyArgumentCaptor.capture())).thenReturn(company);
+        when(companyMapper.companyToCompanyResponse(company)).thenReturn(companyResponse);
 
-        companyService.update(companyUpdateRequest);
+        CompanyResponse result = companyService.update(companyUpdateRequest);
 
+        assertThat(result).isEqualTo(companyResponse);
+        assertThat(companyArgumentCaptor.getValue())
+                .matches(e -> e.getId().equals(companyUpdateRequest.getId()))
+                .matches(e -> e.getName().equals(companyUpdateRequest.getName()));
         verify(companyDao).findById(1L);
         verify(companyDao).update(any());
-        verify(companyMapper).companyToCompanyResponse(any());
+        verify(companyMapper).companyToCompanyResponse(company);
     }
 
     @Test
@@ -121,8 +138,9 @@ class CompanyServiceImplTest {
     @Test
     void testDelete_shouldReturnTrue_whereCompanyExist() {
         Long id = 1L;
-        when(companyDao.findById(id)).thenReturn(mock(Optional.class));
-        when(companyDao.delete(id)).thenReturn(true);
+        Company company = new Company();
+        company.setId(id);
+        when(companyDao.findById(id)).thenReturn(Optional.of(company));
 
         companyService.delete(id);
 

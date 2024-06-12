@@ -40,7 +40,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         int defaultRating = 5;
         Employee employee = new Employee();
         employee.setFirstName(employeeRequest.getFirstName());
-        employee.setLastName(employee.getLastName());
+        employee.setLastName(employeeRequest.getLastName());
         employee.setRating(defaultRating);
         employee.setCompany(company);
         employee.setTasks(Collections.emptySet());
@@ -72,8 +72,8 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public EmployeeResponse update(EmployeeUpdateRequest employeeUpdateRequest) {
         Employee employee = new Employee();
-        employee.setId(employee.getId());
-        employee.setRating(employee.getRating());
+        employee.setId(employeeUpdateRequest.getId());
+        employee.setRating(employeeUpdateRequest.getRating());
         if(employeeDao.findById(employee.getId()).isEmpty()) {
             throw new UpdateException("Работник которого требуется удалить не найден");
         }
@@ -93,10 +93,10 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public boolean delete(Long id) {
+    public void delete(Long id) {
         if(employeeDao.findById(id).isEmpty()) {
             throw new UpdateException("Работник которого требуется удалить не найден");
         }
-        return (employeeDao.delete(id));
+        employeeDao.delete(id);
     }
 }
